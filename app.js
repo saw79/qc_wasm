@@ -31,8 +31,11 @@ async function run() {
 
   // ----------- parameters ----------------
 
-  const width = 576; // 32 * 18
-  const height = 896; // 32 * 27
+  //const width = 576; // 32 * 18
+  //const height = 896; // 32 * 27
+
+  const height = window.innerHeight;
+  const width = height*2/3;
 
   // ----------- setup ----------------
 
