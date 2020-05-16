@@ -132,6 +132,9 @@ async function init(input) {
     imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
         takeObject(arg0);
     };
+    imports.wbg.__wbg_log_a08e1d56c9bc87ac = function(arg0, arg1) {
+        console.log(getStringFromWasm0(arg0, arg1));
+    };
     imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
         var ret = getStringFromWasm0(arg0, arg1);
         return addHeapObject(ret);

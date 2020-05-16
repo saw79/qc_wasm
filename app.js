@@ -28,11 +28,10 @@ async function run() {
 
   // ----------- parameters ----------------
 
-  //const width = 576; // 32 * 18
-  //const height = 896; // 32 * 27
-
+  const width = window.innerWidth;
   const height = window.innerHeight;
-  const width = height*2/3;
+  console.log("setting width: " + width)
+  console.log("setting height: " + height)
 
   // ----------- setup ----------------
 
@@ -40,6 +39,8 @@ async function run() {
   canvas.width = width;
   canvas.height = height;
   const ctx = canvas.getContext("2d");
+
+  canvas.webkitRequestFullScreen();
 
   // double buffering
   const canvas2 = document.createElement("canvas");
