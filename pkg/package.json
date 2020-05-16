@@ -1,0 +1,13 @@
+{
+  "name": "qc_wasm",
+  "collaborators": [
+    "Steve Wacks <swacks@gmail.com>"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "qc_wasm_bg.wasm",
+    "qc_wasm.js"
+  ],
+  "module": "qc_wasm.js",
+  "sideEffects": false
+}
