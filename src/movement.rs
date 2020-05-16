@@ -4,11 +4,11 @@ use ecs::*;
 pub fn move_entity(entity: &mut Entity, frame_time: f32) -> Option<()> {
     let tx: f32 = entity.target.as_ref()?.x as f32;
     let ty: f32 = entity.target.as_ref()?.y as f32;
-    let tx_pix = tx * TILE_SIZE as f32;
-    let ty_pix = ty * TILE_SIZE as f32;
+    let tx_pix = tx * get_tile_size() as f32;
+    let ty_pix = ty * get_tile_size() as f32;
 
     if let Some(ref mut dp) = entity.draw_pos {
-        let dd = MOVE_SPEED * frame_time;
+        let dd = MOVE_SPEED * get_tile_size() as f32 * frame_time;
         let dx = tx_pix - dp.x;
         let dy = ty_pix - dp.y;
         if dx.abs() > dd {

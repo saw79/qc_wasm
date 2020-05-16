@@ -1,7 +1,6 @@
 use crate::{
     GameState,
-    jsDrawImageFull,
-    jsDrawImagePart,
+    jsDrawImage
 };
 
 use core::*;
@@ -27,8 +26,8 @@ fn draw_tiles(state: &GameState) {
     jsDrawImagePart(&state.ctx, "assets/prison_tiles.png", 0, 0, 32, 32, 100, 100, 32, 32);
     */
 
-    let n_x: u32 = state.width / TILE_SIZE;
-    let n_y: u32 = state.height / TILE_SIZE;
+    let n_x: u32 = state.width / get_tile_size();
+    let n_y: u32 = state.height / get_tile_size();
     for tx in 0..n_x {
         for ty in 0..n_y {
             if tx == 0 || tx == n_x - 1 || ty == 0 || ty == n_y - 1 {
@@ -49,22 +48,22 @@ fn draw_entities(state: &GameState) {
 }
 
 fn draw_tile(state: &GameState, tx: u32, ty: u32, tile_type: TileType) {
-    let x = tx * TILE_SIZE;
-    let y = ty * TILE_SIZE;
+    let x = tx * get_tile_size();
+    let y = ty * get_tile_size();
     let (sx, sy) = match tile_type {
         TileType::FLOOR => (0, 0),
         TileType::WALL => (0, 32),
         TileType::DOORCLOSED => (32, 0),
         TileType::DOOROPEN => (32, 32),
     };
-    jsDrawImagePart(&state.ctx, "prison_tiles",
-                    sx, sy, 32, 32,
-                    x as f32, y as f32, TILE_SIZE as f32, TILE_SIZE as f32);
+    jsDrawImage(&state.ctx, "prison_tiles",
+                sx, sy, 32, 32,
+                x as f32, y as f32, get_tile_size() as f32, get_tile_size() as f32);
 }
 
 fn draw_entity(state: &GameState, x: f32, y: f32, entity_name: &str) {
-    jsDrawImagePart(&state.ctx, entity_name,
-                    0, 0, 32, 32,
-                    x, y, TILE_SIZE as f32, TILE_SIZE as f32);
+    jsDrawImage(&state.ctx, entity_name,
+                0, 0, 32, 32,
+                x, y, get_tile_size() as f32, get_tile_size() as f32);
 }
 

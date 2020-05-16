@@ -26,11 +26,9 @@ macro_rules! console_log {
 
 #[wasm_bindgen(raw_module = "../app.js")]
 extern "C" {
-    fn jsDrawImageFull(ctx: &Context, imgName: &str,
-                       x: f32, y: f32);
-    fn jsDrawImagePart(ctx: &Context, imgName: &str,
-                       sx: u32, sy: u32, sw: u32, sh: u32,
-                       x: f32, y: f32, w: f32, h: f32);
+    fn jsDrawImage(ctx: &Context, imgName: &str,
+                   sx: u32, sy: u32, sw: u32, sh: u32,
+                   x: f32, y: f32, w: f32, h: f32);
 }
 
 #[wasm_bindgen]
@@ -47,6 +45,7 @@ pub struct GameState {
 impl GameState {
     #[wasm_bindgen(constructor)]
     pub fn new(ctx: CanvasRenderingContext2d, width: u32, height: u32) -> Self {
+        unsafe { core::TILE_SIZE = height / 14; }
         GameState {
             ctx: ctx,
             width: width,
@@ -64,8 +63,8 @@ impl GameState {
     }
 
     pub fn add_mouse_click(&mut self, x: u32, y: u32) {
-        let tx = x / core::TILE_SIZE;
-        let ty = y / core::TILE_SIZE;
+        let tx = x / core::get_tile_size();
+        let ty = y / core::get_tile_size();
         self.player.target = Some(ecs::CTarget { x: tx, y: ty });
     }
 

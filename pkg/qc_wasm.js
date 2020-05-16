@@ -1,4 +1,4 @@
-import { jsDrawImagePart } from '../app.js';
+import { jsDrawImage } from '../app.js';
 
 let wasm;
 
@@ -126,8 +126,8 @@ async function init(input) {
     }
     const imports = {};
     imports.wbg = {};
-    imports.wbg.__wbg_jsDrawImagePart_d53a26a1f83b3555 = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) {
-        jsDrawImagePart(getObject(arg0), getStringFromWasm0(arg1, arg2), arg3 >>> 0, arg4 >>> 0, arg5 >>> 0, arg6 >>> 0, arg7, arg8, arg9, arg10);
+    imports.wbg.__wbg_jsDrawImage_d97f6f4af62177d1 = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) {
+        jsDrawImage(getObject(arg0), getStringFromWasm0(arg1, arg2), arg3 >>> 0, arg4 >>> 0, arg5 >>> 0, arg6 >>> 0, arg7, arg8, arg9, arg10);
     };
     imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
         takeObject(arg0);

@@ -1,5 +1,11 @@
-pub const TILE_SIZE: u32 = 32;
-pub const MOVE_SPEED: f32 = 320.0; // pix/s
+pub static mut TILE_SIZE: u32 = 32;
+pub const MOVE_SPEED: f32 = 10.0; // tiles/s
+
+pub fn get_tile_size() -> u32 {
+    unsafe {
+        TILE_SIZE
+    }
+}
 
 pub enum TileType {
     FLOOR,

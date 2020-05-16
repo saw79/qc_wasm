@@ -19,11 +19,8 @@ function loadAllImages() {
   assets["x."] = loadImage("assets/x.png");
 }
 
-export function jsDrawImageFull(ctx, imgName, x, y) {
-  ctx.drawImage(assets[imgName], x, y);
-}
-export function jsDrawImagePart(ctx, imgName, sx, sy, sw, sh, x, y, w, h) {
-  ctx.drawImage(assets[imgName], sx, sy, sw, sh, x, y, w, h);
+export function jsDrawImage(ctx, imgName, sx, sy, sw, sh, x, y, w, h) {
+  ctx.drawImage(assets[imgName], sx, sy, sw, sh, x-1, y-1, w+2, h+2);
 }
 
 async function run() {
