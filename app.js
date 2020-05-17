@@ -30,8 +30,6 @@ async function run() {
 
   const width = window.innerWidth;
   const height = window.innerHeight;
-  console.log("setting width: " + width)
-  console.log("setting height: " + height)
 
   // ----------- setup ----------------
 
@@ -40,7 +38,7 @@ async function run() {
   canvas.height = height;
   const ctx = canvas.getContext("2d");
 
-  canvas.webkitRequestFullScreen();
+  //canvas.webkitRequestFullScreen();
 
   // double buffering
   const canvas2 = document.createElement("canvas");
@@ -58,6 +56,10 @@ async function run() {
     let x = e.clientX - rect.left;
     let y = e.clientY - rect.top;
     state.add_mouse_click(x, y);
+  });
+
+  window.addEventListener("keypress", function(e) {
+    state.add_key_press(e.keyCode);
   });
 
   // ----------- start loop ----------------

@@ -1,11 +1,9 @@
 use ecs::*;
-use util::*;
 
-pub fn create_player(tile_size: u32) -> Entity {
-    let tile_pos = CTilePos { x: 5, y: 5 };
+pub fn create_player(x: u32, y: u32) -> Entity {
     Entity {
-        tile_pos: Some(tile_pos.clone()),
-        draw_pos: Some(tile_to_draw(&tile_pos, tile_size)),
+        logical_pos: Some(LogicalPos { x: x, y: y }),
+        visual_pos: Some(VisualPos { x: x as f32, y: y as f32 }),
         target: None,
     }
 }

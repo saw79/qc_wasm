@@ -4,23 +4,16 @@ extern crate web_sys;
 use wasm_bindgen::prelude::*;
 use web_sys::CanvasRenderingContext2d;
 
+#[macro_use]
+mod debug;
+use debug::log;
+
 mod core;
 mod ecs;
 mod util;
 mod factory;
 mod render;
 mod movement;
-
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = console)]
-    fn log(s: &str);
-}
-
-#[allow(unused_macros)]
-macro_rules! console_log {
-    ($($t:tt)*) => (log(&format_args!($($t)*).to_string()))
-}
 
 #[wasm_bindgen(raw_module = "../app.js")]
 extern "C" {
@@ -32,9 +25,8 @@ extern "C" {
 #[wasm_bindgen]
 pub struct GameState {
     ctx: CanvasRenderingContext2d,
-    width: u32,
-    height: u32,
-    tile_size: u32,
+    camera: core::Camera,
+    tile_grid: core::TileGrid,
     player: ecs::Entity,
     enemies: Vec<ecs::Entity>,
 }
@@ -44,14 +36,11 @@ pub struct GameState {
 impl GameState {
     #[wasm_bindgen(constructor)]
     pub fn new(ctx: CanvasRenderingContext2d, width: u32, height: u32) -> Self {
-        console_log!("{}, {}", width, height);
-        let tile_size: u32 = height / core::Y_TILES;
         GameState {
             ctx: ctx,
-            width: width,
-            height: height,
-            tile_size: tile_size,
-            player: factory::create_player(tile_size),
+            camera: core::Camera::new(40, 40, width, height),
+            tile_grid: core::TileGrid::new(40, 40),
+            player: factory::create_player(5, 5),
             enemies: vec![],
         }
     }
@@ -63,16 +52,22 @@ impl GameState {
         self.render();
     }
 
-    pub fn add_mouse_click(&mut self, x: u32, y: u32) {
-        let tx = x / self.tile_size;
-        let ty = y / self.tile_size;
-        self.player.target = Some(ecs::CTarget { x: tx, y: ty });
+    pub fn add_mouse_click(&mut self, mx: u32, my: u32) {
+        let (wx, wy) = util::pixel_to_world(mx as f32, my as f32, &self.camera);
+        self.player.target = Some(ecs::Target { x: wx as u32, y: wy as u32 });
+    }
+
+    pub fn add_key_press(&mut self, code: u32) {
+        console_log!("rust received code: {}", code);
     }
 
     // ------- internal functions ---------------------
 
-    fn update(&mut self, dt: f32) {
-        movement::move_entity(&mut self.player, dt, self.tile_size);
+    fn update(&mut self, dt: f32) -> Option<()> {
+        movement::move_entity(&mut self.player, dt);
+        self.camera.x = self.player.visual_pos.as_ref()?.x;
+        self.camera.y = self.player.visual_pos.as_ref()?.y;
+        Some(())
     }
 
     fn render(&mut self) {

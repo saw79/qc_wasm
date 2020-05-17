@@ -1,10 +1,10 @@
 use crate::{
     GameState,
-    jsDrawImage
+    jsDrawImage,
 };
 
 use core::*;
-//use ecs::*;
+use util::*;
 
 pub fn draw_all(state: &GameState) {
     clear(state);
@@ -14,48 +14,51 @@ pub fn draw_all(state: &GameState) {
 
 fn clear(state: &GameState) {
     state.ctx.set_fill_style(&"black".into());
-    state.ctx.fill_rect(0., 0., state.width as f64, state.height as f64);
+    state.ctx.fill_rect(0., 0., state.camera.canvas_width as f64, state.camera.canvas_height as f64);
 }
 
 fn draw_tiles(state: &GameState) {
-    let n_x: u32 = state.width / state.tile_size;
-    let n_y: u32 = state.height / state.tile_size;
-    for tx in 0..n_x {
-        for ty in 0..n_y {
-            if tx == 0 || tx == n_x - 1 || ty == 0 || ty == n_y - 1 {
-                draw_tile(state, tx, ty, TileType::WALL);
-            }
-            else {
-                draw_tile(state, tx, ty, TileType::FLOOR);
+    let tile_x_0 = (state.camera.x - state.camera.width/2.0) as i32 - 1;
+    let tile_x_1 = (state.camera.x + state.camera.width/2.0) as i32 + 1;
+    let tile_y_0 = (state.camera.y - state.camera.height/2.0) as i32 - 1;
+    let tile_y_1 = (state.camera.y + state.camera.height/2.0) as i32 + 1;
+
+    for ix in tile_x_0..tile_x_1+1 {
+        for iy in tile_y_0..tile_y_1+1 {
+            if ix >= 0 && ix < state.tile_grid.width as i32 &&
+               iy >= 0 && iy < state.tile_grid.height as i32 {
+                draw_tile(state, ix as f32, iy as f32, state.tile_grid.at(ix as usize, iy as usize));
             }
         }
     }
 }
 
-fn draw_entities(state: &GameState) {
-    match &state.player.draw_pos {
-        Some(draw_pos) => draw_entity(state, draw_pos.x, draw_pos.y, "player_none"),
-        None => {},
-    };
+fn draw_entities(state: &GameState) -> Option<()> {
+    let vp = state.player.visual_pos.as_ref()?;
+    draw_entity(state, vp.x, vp.y, "player_none");
+    Some(())
 }
 
-fn draw_tile(state: &GameState, tx: u32, ty: u32, tile_type: TileType) {
-    let x = tx * state.tile_size;
-    let y = ty * state.tile_size;
+fn draw_tile(state: &GameState, wx: f32, wy: f32, tile_type: &TileType) {
+    let (px, py) = world_to_pixel(wx, wy, &state.camera);
     let (sx, sy) = match tile_type {
         TileType::FLOOR => (0, 0),
         TileType::WALL => (0, 32),
         TileType::DOORCLOSED => (32, 0),
         TileType::DOOROPEN => (32, 32),
     };
+    let tile_pix = state.camera.tile_pix;
     jsDrawImage(&state.ctx, "prison_tiles",
                 sx, sy, 32, 32,
-                x as f32, y as f32, state.tile_size as f32, state.tile_size as f32);
+                px as f32, py as f32, tile_pix as f32, tile_pix as f32);
 }
 
-fn draw_entity(state: &GameState, x: f32, y: f32, entity_name: &str) {
+fn draw_entity(state: &GameState, wx: f32, wy: f32, entity_name: &str) {
+    let (px, py) = world_to_pixel(wx, wy, &state.camera);
+
+    let tile_pix = state.camera.tile_pix;
     jsDrawImage(&state.ctx, entity_name,
                 0, 0, 32, 32,
-                x, y, state.tile_size as f32, state.tile_size as f32);
+                px, py, tile_pix as f32, tile_pix as f32);
 }
 
