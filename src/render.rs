@@ -5,6 +5,7 @@ use crate::{
 
 use core::*;
 use util::*;
+use ecs::*;
 
 pub fn draw_all(state: &GameState) {
     clear(state);
@@ -33,10 +34,16 @@ fn draw_tiles(state: &GameState) {
     }
 }
 
-fn draw_entities(state: &GameState) -> Option<()> {
-    let vp = state.player.visual_pos.as_ref()?;
-    draw_entity(state, vp.x, vp.y, "player_none");
-    Some(())
+fn draw_entities(state: &GameState) {
+    if let Some(ri) = &state.player.render_info {
+        draw_entity(state, ri);
+    }
+
+    for entity in &state.enemies {
+        if let Some(ri) = &entity.render_info {
+            draw_entity(state, ri);
+        }
+    }
 }
 
 fn draw_tile(state: &GameState, wx: f32, wy: f32, tile_type: &TileType) {
@@ -53,12 +60,12 @@ fn draw_tile(state: &GameState, wx: f32, wy: f32, tile_type: &TileType) {
                 px as f32, py as f32, tile_pix as f32, tile_pix as f32);
 }
 
-fn draw_entity(state: &GameState, wx: f32, wy: f32, entity_name: &str) {
-    let (px, py) = world_to_pixel(wx, wy, &state.camera);
+fn draw_entity(state: &GameState, ri: &RenderInfo) {
+    let (px, py) = world_to_pixel(ri.x, ri.y, &state.camera);
 
     let tile_pix = state.camera.tile_pix;
-    jsDrawImage(&state.ctx, entity_name,
-                0, 0, 32, 32,
+    jsDrawImage(&state.ctx, ri.sheet_name,
+                ri.sheet_x, ri.sheet_y, ri.sheet_w, ri.sheet_h,
                 px, py, tile_pix as f32, tile_pix as f32);
 }
 

@@ -2,7 +2,7 @@ pub const MOVE_SPEED: f32 = 10.0; // tiles/s
 
 const Y_TILES: u32 = 20;
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq)]
 pub enum TileType {
     FLOOR,
     WALL,
@@ -31,6 +31,10 @@ impl TileGrid {
 
         tiles[1][1] = TileType::DOOROPEN;
         tiles[1][2] = TileType::DOORCLOSED;
+
+        for y in 2..height-2 {
+            tiles[y][20] = TileType::WALL;
+        }
 
         TileGrid {
             width: width,
