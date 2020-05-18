@@ -17,6 +17,7 @@ mod render;
 mod movement;
 mod path_logic;
 mod turn_logic;
+mod animation_logic;
 
 #[wasm_bindgen(raw_module = "../app.js")]
 extern "C" {
@@ -48,9 +49,9 @@ impl GameState {
         camera.y = 5.0;
 
         let enemies = vec![
-            factory::create_target(2, 2),
-            factory::create_target(5, 5),
-            factory::create_target(8, 8),
+            //factory::create_target(2, 2),
+            //factory::create_target(5, 5),
+            //factory::create_target(8, 8),
         ];
 
         GameState {
@@ -118,6 +119,9 @@ impl GameState {
         movement::move_entity(&mut self.player, dt);
         self.camera.x = self.player.render_info.as_ref()?.x;
         self.camera.y = self.player.render_info.as_ref()?.y;
+
+        animation_logic::compute_animations(self, dt);
+
         Some(())
     }
 

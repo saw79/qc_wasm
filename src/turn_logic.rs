@@ -1,6 +1,7 @@
 use crate::GameState;
 use core::TileGrid;
 use ecs::{Entity, LogicalPos, Action};
+use factory::{Direction, get_walk_anim};
 
 use debug::log;
 
@@ -44,7 +45,33 @@ fn increment_turn(state: &mut GameState) {
 fn compute_turn<>(entity: &mut Entity, _tile_grid: &TileGrid) -> Option<Action> {
     if let Some(ref mut aq) = &mut entity.action_queue {
         if aq.queue.len() > 0 {
-            aq.current = Some(aq.queue.remove(0));
+            let action = aq.queue.remove(0);
+            match action {
+                Action::Move(mx, my) => {
+                    let logical = entity.logical_pos.as_ref()?;
+                    let dx: i32 = (mx - logical.x) as i32;
+                    let dy: i32 = (my - logical.y) as i32;
+                    if let Some(ri) = entity.render_info.as_mut() {
+                        if dx > 0 {
+                            ri.frames = get_walk_anim(&Direction::Right);
+                        }
+                        else if dx < 0 {
+                            ri.frames = get_walk_anim(&Direction::Left);
+                        }
+                        else { // dx == 0
+                            if dy > 0 {
+                                ri.frames = get_walk_anim(&Direction::Down);
+                            }
+                            else {
+                                ri.frames = get_walk_anim(&Direction::Up);
+                            }
+                        }
+                    }
+                },
+                _ => {},
+            };
+
+            aq.current = Some(action);
             return aq.current.clone();
         }
     }

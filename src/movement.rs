@@ -9,6 +9,7 @@ pub fn move_entity(entity: &mut Entity, frame_time: f32) -> Option<()> {
             let tx = tx as f32;
             let ty = ty as f32;
             if let Some(ref mut ri) = entity.render_info {
+                ri.active = true;
                 let dd = MOVE_SPEED * frame_time;
                 let dx = tx - ri.x;
                 let dy = ty - ri.y;
@@ -32,6 +33,7 @@ pub fn move_entity(entity: &mut Entity, frame_time: f32) -> Option<()> {
 
                 if finished {
                     action_queue.current = None;
+                    ri.active = false;
                 }
             }
         },

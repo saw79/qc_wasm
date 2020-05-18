@@ -8,14 +8,23 @@ pub struct LogicalPos {
 }
 
 #[derive(Debug)]
-pub struct RenderInfo {
-    pub x: f32,
-    pub y: f32,
+pub struct RenderFrame {
     pub sheet_name: &'static str,
     pub sheet_x: u32,
     pub sheet_y: u32,
     pub sheet_w: u32,
     pub sheet_h: u32,
+}
+
+#[derive(Debug)]
+pub struct RenderInfo {
+    pub x: f32,
+    pub y: f32,
+    pub active: bool,
+    pub time: f32,
+    pub frame_duration: f32,
+    pub curr_frame: usize,
+    pub frames: Vec<RenderFrame>,
 }
 
 #[derive(Debug, Clone)]
@@ -30,20 +39,11 @@ pub struct ActionQueue {
     pub queue: Vec<Action>,
 }
 
-/*
-#[derive(Debug)]
-pub struct Target {
-    pub x: u32,
-    pub y: u32,
-}
-*/
-
 // ------------------------------------------------------------
 
 pub struct Entity {
     pub logical_pos: Option<LogicalPos>,
     pub render_info: Option<RenderInfo>,
     pub action_queue: Option<ActionQueue>,
-    //pub target: Option<Target>,
 }
 

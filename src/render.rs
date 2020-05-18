@@ -7,6 +7,8 @@ use core::*;
 use util::*;
 use ecs::*;
 
+use debug::log;
+
 pub fn draw_all(state: &GameState) {
     clear(state);
     draw_tiles(state);
@@ -64,8 +66,11 @@ fn draw_entity(state: &GameState, ri: &RenderInfo) {
     let (px, py) = world_to_pixel(ri.x, ri.y, &state.camera);
 
     let tile_pix = state.camera.tile_pix;
-    jsDrawImage(&state.ctx, ri.sheet_name,
-                ri.sheet_x, ri.sheet_y, ri.sheet_w, ri.sheet_h,
-                px, py, tile_pix as f32, tile_pix as f32);
+    if ri.curr_frame < ri.frames.len() {
+        let rf = &ri.frames[ri.curr_frame];
+        jsDrawImage(&state.ctx, rf.sheet_name,
+                    rf.sheet_x, rf.sheet_y, rf.sheet_w, rf.sheet_h,
+                    px, py, tile_pix as f32, tile_pix as f32);
+    }
 }
 
