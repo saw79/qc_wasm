@@ -58,6 +58,13 @@ async function run() {
     state.add_mouse_click(x, y);
   });
 
+  canvas.addEventListener("touchend", function(e) {
+    let rect = canvas.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+    state.add_mouse_click(x, y);
+  });
+
   window.addEventListener("keypress", function(e) {
     state.add_key_press(e.keyCode);
   });
