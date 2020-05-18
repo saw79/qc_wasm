@@ -49,12 +49,6 @@ impl GameState {
 
         let enemies = vec![
             factory::create_target(2, 2),
-            factory::create_target(4, 4),
-            factory::create_target(6, 6),
-            factory::create_target(8, 8),
-            factory::create_target(10, 10),
-            factory::create_target(12, 12),
-            factory::create_target(14, 14),
         ];
 
         GameState {
@@ -97,7 +91,7 @@ impl GameState {
         let y0 = self.player.logical_pos.as_ref()?.y;
 
         match path_logic::get_path(x0, y0, wx, wy, &self.tile_grid) {
-            Some((mut path, cost)) => {
+            Some((mut path, _cost)) => {
                 path.remove(0);
                 let new_q = path.into_iter().map(|p| ecs::Action::Move(p.0, p.1)).collect();
                 self.player.action_queue.as_mut().map(|mut aq| aq.queue = new_q);
