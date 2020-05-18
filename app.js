@@ -51,17 +51,20 @@ async function run() {
 
   var state = new GameState(ctx2, width, height);
 
-  function handleClick(e) {
+  function handleClick(cx, cy) {
     let rect = canvas.getBoundingClientRect();
-    let x = e.clientX - rect.left;
-    let y = e.clientY - rect.top;
+    let x = cx - rect.left;
+    let y = cy - rect.top;
     state.add_mouse_click(x, y);
   }
 
-  canvas.addEventListener("mousedown", handleClick);
-  //canvas.addEventListener("mouseup", handleClick);
-  canvas.addEventListener("touchstart", handleClick);
-  //canvas.addEventListener("touchend", handleClick);
+  canvas.addEventListener("mouseup", function (e) {
+    handleClick(e.clientX, e.clientY);
+  });
+  canvas.addEventListener("touchend", function (e) {
+    handleClick(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    e.preventDefault();
+  });
 
   window.addEventListener("keypress", function(e) {
     state.add_key_press(e.keyCode);

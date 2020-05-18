@@ -49,6 +49,8 @@ impl GameState {
 
         let enemies = vec![
             factory::create_target(2, 2),
+            factory::create_target(5, 5),
+            factory::create_target(8, 8),
         ];
 
         GameState {
@@ -66,6 +68,14 @@ impl GameState {
     pub fn tick(&mut self, dt_ms: f32) {
         self.update(dt_ms/1000.0);
         self.render();
+    }
+
+    pub fn touchtest(&mut self) {
+        for r in 1..18 {
+            for c in 1..18 {
+                self.enemies.push(factory::create_target(r, c));
+            }
+        }
     }
 
     pub fn add_mouse_click(&mut self, mx: u32, my: u32) {

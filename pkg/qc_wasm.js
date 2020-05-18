@@ -79,6 +79,11 @@ export class GameState {
         wasm.gamestate_tick(this.ptr, dt_ms);
     }
     /**
+    */
+    touchtest() {
+        wasm.gamestate_touchtest(this.ptr);
+    }
+    /**
     * @param {number} mx
     * @param {number} my
     */
