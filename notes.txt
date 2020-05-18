@@ -1,0 +1,25 @@
+ActionQueue
+  current: Option<Action>
+  queue: Vec<Action>
+
+compute_turn
+  has current action?
+    update logical to current
+    return
+
+  has queue.len > 0?
+    move into current
+    update logical to current
+    return
+
+  get new move:
+    AI -> compute
+    Human -> block/wait
+
+movement
+  has move action?
+    move toward dest
+
+    if dest reached
+      kill action
+

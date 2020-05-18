@@ -1,7 +1,5 @@
 use pathfinding::prelude::{absdiff, astar};
 
-use debug::log;
-
 use core::{TileType, TileGrid};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
@@ -47,26 +45,4 @@ pub fn get_path(
     let goal = Pos(x1, y1);
     astar(&start, |p| p.neighbors(tile_grid), |p| p.distance(&goal), |p| *p == goal)
 }
-
-/*
-pub fn test() {
-    test_full();
-}
-
-fn test_full() {
-    let start = Pos(1, 1);
-    let goal = Pos(4, 6);
-    let result: Option<(Vec<Pos>, u32)> =
-        astar(&start, |p| p.neighbors(), |p| p.distance(&goal)/3, |p| *p == goal);
-
-    match result {
-        Some((path, cost)) => {
-            console_log!("Success :)");
-            console_log!("{:?}", path);
-            console_log!("{}", cost);
-        },
-        None => console_log!("Failure :("),
-    };
-}
-*/
 

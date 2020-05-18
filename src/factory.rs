@@ -12,8 +12,11 @@ pub fn create_player(x: u32, y: u32) -> Entity {
             sheet_w: 32,
             sheet_h: 32,
         }),
-        action_queue: None,
-        target: None,
+        action_queue: Some(ActionQueue {
+            current: None,
+            queue: vec![],
+        }),
+        //target: None,
     }
 }
 
@@ -30,7 +33,7 @@ pub fn create_target(x: u32, y: u32) -> Entity {
             sheet_h: 64,
         }),
         action_queue: None,
-        target: None,
+        //target: None,
     }
 }
 
