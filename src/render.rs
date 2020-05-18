@@ -53,7 +53,7 @@ fn draw_tile(state: &GameState, wx: f32, wy: f32, tile_type: &TileType) {
     let tile_pix = state.camera.tile_pix;
     jsDrawImage(&state.ctx, "prison_tiles",
                 sx, sy, 32, 32,
-                px as f32, py as f32, tile_pix as f32, tile_pix as f32);
+                px as f32, py as f32, tile_pix as f32, tile_pix as f32, true);
 }
 
 fn draw_entity(state: &GameState, ri: &RenderInfo) {
@@ -64,7 +64,7 @@ fn draw_entity(state: &GameState, ri: &RenderInfo) {
         let rf = &ri.frames[ri.curr_frame];
         jsDrawImage(&state.ctx, rf.sheet_name,
                     rf.sheet_x, rf.sheet_y, rf.sheet_w, rf.sheet_h,
-                    px, py, tile_pix as f32, tile_pix as f32);
+                    px, py, tile_pix as f32, tile_pix as f32, false);
     }
 }
 

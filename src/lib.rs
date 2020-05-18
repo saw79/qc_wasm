@@ -15,6 +15,7 @@ mod ecs;
 mod util;
 mod factory;
 mod render;
+mod render_ui;
 mod movement;
 mod path_logic;
 mod turn_logic;
@@ -25,7 +26,8 @@ mod ai_logic;
 extern "C" {
     fn jsDrawImage(ctx: &CanvasRenderingContext2d, imgName: &str,
                    sx: u32, sy: u32, sw: u32, sh: u32,
-                   x: f32, y: f32, w: f32, h: f32);
+                   x: f32, y: f32, w: f32, h: f32,
+                   pixel_fix: bool);
 }
 
 #[wasm_bindgen]
@@ -118,6 +120,7 @@ impl GameState {
 
     fn render(&mut self) {
         render::draw_all(self);
+        render_ui::draw_ui(self);
     }
 }
 

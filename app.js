@@ -14,10 +14,18 @@ function loadAllImages() {
   assets["prison_guard"] = loadImage("assets/prison_guard.png");
   assets["prison_soldier"] = loadImage("assets/prison_soldier.png");
   assets["prison_warden"] = loadImage("assets/prison_warden.png");
+  assets["status_bg"] = loadImage("assets/status_bg.png");
+  assets["status_cover"] = loadImage("assets/status_cover.png");
+  assets["health_fill"] = loadImage("assets/health_fill.png");
+  assets["cog_fill"] = loadImage("assets/cog_fill.png");
 }
 
-export function jsDrawImage(ctx, imgName, sx, sy, sw, sh, x, y, w, h) {
-  ctx.drawImage(assets[imgName], sx, sy, sw, sh, x-1, y-1, w+2, h+2);
+export function jsDrawImage(ctx, imgName, sx, sy, sw, sh, x, y, w, h, pixel_fix) {
+  if (pixel_fix) {
+    ctx.drawImage(assets[imgName], sx, sy, sw, sh, x-1, y-1, w+2, h+2);
+  } else {
+    ctx.drawImage(assets[imgName], sx, sy, sw, sh, x, y, w, h);
+  }
 }
 
 async function run() {
