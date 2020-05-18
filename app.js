@@ -11,12 +11,9 @@ function loadImage(path) {
 function loadAllImages() {
   assets["prison_tiles"] = loadImage("assets/prison_tiles.png");
   assets["player_none"] = loadImage("assets/player_none.png");
-  assets["target"] = loadImage("assets/target.png");
-  /*assets["prison_soldier"] = loadImage("assets/prison_soldier.png");
   assets["prison_guard"] = loadImage("assets/prison_guard.png");
-  assets["prison_stairs"] = loadImage("assets/prison_stairs.png");
+  assets["prison_soldier"] = loadImage("assets/prison_soldier.png");
   assets["prison_warden"] = loadImage("assets/prison_warden.png");
-  assets["x."] = loadImage("assets/x.png");*/
 }
 
 export function jsDrawImage(ctx, imgName, sx, sy, sw, sh, x, y, w, h) {

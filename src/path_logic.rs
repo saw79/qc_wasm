@@ -24,7 +24,7 @@ impl Pos {
                 let ny: i32 = y as i32 + dy;
                 if nx >= 0 && nx < tile_grid.width as i32 &&
                    ny >= 0 && ny < tile_grid.height as i32 &&
-                   *tile_grid.at(nx as usize, ny as usize) != TileType::WALL {
+                   *tile_grid.at(nx, ny) != TileType::WALL {
                     nbs.push(Pos(nx as u32, ny as u32));
                 }
             }

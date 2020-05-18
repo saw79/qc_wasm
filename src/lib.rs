@@ -1,6 +1,7 @@
 extern crate wasm_bindgen;
 extern crate web_sys;
 extern crate pathfinding;
+extern crate rand;
 
 use wasm_bindgen::prelude::*;
 use web_sys::CanvasRenderingContext2d;
@@ -18,6 +19,7 @@ mod movement;
 mod path_logic;
 mod turn_logic;
 mod animation_logic;
+mod ai_logic;
 
 #[wasm_bindgen(raw_module = "../app.js")]
 extern "C" {
@@ -31,9 +33,8 @@ pub struct GameState {
     ctx: CanvasRenderingContext2d,
     camera: core::Camera,
     tile_grid: core::TileGrid,
-    player: ecs::Entity,
-    enemies: Vec<ecs::Entity>,
-    curr_turn: i32,
+    entities: Vec<ecs::Entity>,
+    curr_turn: usize,
 }
 
 
@@ -43,24 +44,22 @@ impl GameState {
     pub fn new(ctx: CanvasRenderingContext2d, width: u32, height: u32) -> Self {
         let mut camera = core::Camera::new(40, 40, width, height);
 
-        let player = factory::create_player(5, 5);
+        let (px, py) = (5, 5);
 
-        camera.x = 5.0;
-        camera.y = 5.0;
+        camera.x = px as f32;
+        camera.y = py as f32;
 
-        let enemies = vec![
-            //factory::create_target(2, 2),
-            //factory::create_target(5, 5),
-            //factory::create_target(8, 8),
+        let entities = vec![
+            factory::create_player(px, py),
+            factory::create_enemy(10, 10, "prison_guard"),
         ];
 
         GameState {
             ctx: ctx,
             camera: camera,
             tile_grid: core::TileGrid::new(40, 40),
-            player: player,
-            enemies: enemies,
-            curr_turn: -1,
+            entities: entities,
+            curr_turn: 0,
         }
     }
 
@@ -69,14 +68,6 @@ impl GameState {
     pub fn tick(&mut self, dt_ms: f32) {
         self.update(dt_ms/1000.0);
         self.render();
-    }
-
-    pub fn touchtest(&mut self) {
-        for r in 1..18 {
-            for c in 1..18 {
-                self.enemies.push(factory::create_target(r, c));
-            }
-        }
     }
 
     pub fn add_mouse_click(&mut self, mx: u32, my: u32) {
@@ -91,21 +82,21 @@ impl GameState {
     // ------- internal functions ---------------------
 
     fn process_new_target(&mut self, wx: u32, wy: u32) -> Option<()> {
-        if let Some(ref mut aq) = &mut self.player.action_queue {
+        if let Some(ref mut aq) = &mut self.entities[0].action_queue {
             if aq.queue.len() > 0 {
                 aq.queue.clear();
                 return Some(());
             }
         }
 
-        let x0 = self.player.logical_pos.as_ref()?.x;
-        let y0 = self.player.logical_pos.as_ref()?.y;
+        let x0 = self.entities[0].logical_pos.as_ref()?.x;
+        let y0 = self.entities[0].logical_pos.as_ref()?.y;
 
         match path_logic::get_path(x0, y0, wx, wy, &self.tile_grid) {
             Some((mut path, _cost)) => {
                 path.remove(0);
                 let new_q = path.into_iter().map(|p| ecs::Action::Move(p.0, p.1)).collect();
-                self.player.action_queue.as_mut().map(|mut aq| aq.queue = new_q);
+                self.entities[0].action_queue.as_mut().map(|mut aq| aq.queue = new_q);
             },
             None => console_log!("  no path"),
         };
@@ -116,9 +107,9 @@ impl GameState {
     fn update(&mut self, dt: f32) -> Option<()> {
         turn_logic::compute_turns(self);
 
-        movement::move_entity(&mut self.player, dt);
-        self.camera.x = self.player.render_info.as_ref()?.x;
-        self.camera.y = self.player.render_info.as_ref()?.y;
+        movement::move_entities(self, dt);
+        self.camera.x = self.entities[0].render_info.as_ref()?.x;
+        self.camera.y = self.entities[0].render_info.as_ref()?.y;
 
         animation_logic::compute_animations(self, dt);
 

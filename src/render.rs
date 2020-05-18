@@ -7,8 +7,6 @@ use core::*;
 use util::*;
 use ecs::*;
 
-use debug::log;
-
 pub fn draw_all(state: &GameState) {
     clear(state);
     draw_tiles(state);
@@ -30,18 +28,14 @@ fn draw_tiles(state: &GameState) {
         for iy in tile_y_0..tile_y_1+1 {
             if ix >= 0 && ix < state.tile_grid.width as i32 &&
                iy >= 0 && iy < state.tile_grid.height as i32 {
-                draw_tile(state, ix as f32, iy as f32, state.tile_grid.at(ix as usize, iy as usize));
+                draw_tile(state, ix as f32, iy as f32, state.tile_grid.at(ix, iy));
             }
         }
     }
 }
 
 fn draw_entities(state: &GameState) {
-    if let Some(ri) = &state.player.render_info {
-        draw_entity(state, ri);
-    }
-
-    for entity in &state.enemies {
+    for entity in &state.entities {
         if let Some(ri) = &entity.render_info {
             draw_entity(state, ri);
         }

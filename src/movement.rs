@@ -1,7 +1,14 @@
+use crate::GameState;
 use core::MOVE_SPEED;
 use ecs::{Entity, Action, ActionQueue};
 
-pub fn move_entity(entity: &mut Entity, frame_time: f32) -> Option<()> {
+pub fn move_entities(state: &mut GameState, dt: f32) {
+    for entity in state.entities.iter_mut() {
+        move_entity(entity, dt);
+    }
+}
+
+fn move_entity(entity: &mut Entity, dt: f32) -> Option<()> {
     let action_queue: &mut ActionQueue = entity.action_queue.as_mut()?;
 
     match action_queue.current {
@@ -10,7 +17,7 @@ pub fn move_entity(entity: &mut Entity, frame_time: f32) -> Option<()> {
             let ty = ty as f32;
             if let Some(ref mut ri) = entity.render_info {
                 ri.active = true;
-                let dd = MOVE_SPEED * frame_time;
+                let dd = MOVE_SPEED * dt;
                 let dx = tx - ri.x;
                 let dy = ty - ri.y;
 

@@ -2,7 +2,9 @@ use crate::GameState;
 use ecs::Entity;
 
 pub fn compute_animations(state: &mut GameState, dt: f32) {
-    compute_animation(&mut state.player, dt);
+    for entity in state.entities.iter_mut() {
+        compute_animation(entity, dt);
+    }
 }
 
 fn compute_animation(entity: &mut Entity, dt: f32) -> Option<()> {

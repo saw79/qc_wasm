@@ -43,8 +43,13 @@ impl TileGrid {
         }
     }
 
-    pub fn at(&self, x: usize, y: usize) -> &TileType {
-        &self.tiles[y][x]
+    pub fn at(&self, x: i32, y: i32) -> &TileType {
+        // TODO make this better/safer
+        if x < 0 || x >= self.width as i32 || y < 0 || y >= self.height as i32 {
+            &TileType::WALL
+        } else {
+            &self.tiles[y as usize][x as usize]
+        }
     }
 }
 

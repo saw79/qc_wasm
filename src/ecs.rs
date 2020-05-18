@@ -39,11 +39,24 @@ pub struct ActionQueue {
     pub queue: Vec<Action>,
 }
 
+#[derive(Debug)]
+pub struct CombatInfo {
+    pub health: u32,
+    pub max_health: u32,
+    pub cognition: u32,
+    pub max_cognition: u32,
+    pub damage: u32,
+    pub absorption: u32,
+    pub dodge: u32,
+}
+
 // ------------------------------------------------------------
 
 pub struct Entity {
+    pub name: &'static str,
     pub logical_pos: Option<LogicalPos>,
     pub render_info: Option<RenderInfo>,
     pub action_queue: Option<ActionQueue>,
+    pub combat_info: Option<CombatInfo>,
 }
 
