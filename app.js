@@ -79,7 +79,7 @@ async function run() {
     handleClick(e.clientX, e.clientY, false);
     mouseDown = false;
   });
-  canvas.addEventListener("mousemove", function(e) {
+  canvas.addEventListener("mousemove", function (e) {
     if (mouseDown) {
       handleDrag(e.clientX, e.clientY);
     }
@@ -94,8 +94,13 @@ async function run() {
     e.preventDefault();
     mouseDown = false;
   });
+  canvas.addEventListener("touchmove", function (e) {
+    if (mouseDown) {
+      handleDrag(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    }
+  });
 
-  window.addEventListener("keypress", function(e) {
+  window.addEventListener("keypress", function (e) {
     state.receive_key(e.keyCode);
   });
 
