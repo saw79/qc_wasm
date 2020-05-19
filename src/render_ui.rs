@@ -4,9 +4,9 @@ use crate::{
 };
 
 pub fn draw_ui(state: &GameState) -> Option<()> {
-    let ci = state.entities[0].combat_info.as_ref()?;
-    draw_status_bar(state, ci.health, ci.max_health, true);
-    draw_status_bar(state, ci.cognition, ci.max_cognition, false);
+    let ci = state.entity_map.get(&0)?.combat_info.as_ref()?;
+    draw_status_bar(state, ci.health.abs() as u32, ci.max_health.abs() as u32, true);
+    draw_status_bar(state, ci.cognition.abs() as u32, ci.max_cognition.abs() as u32, false);
     Some(())
 }
 

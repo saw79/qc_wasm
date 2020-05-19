@@ -1,6 +1,4 @@
 
-// ------------------------------------------------------------
-
 #[derive(Debug, Clone)]
 pub struct LogicalPos {
     pub x: u32,
@@ -31,7 +29,7 @@ pub struct RenderInfo {
 pub enum Action {
     Wait,
     Move(u32, u32),
-    //Attack(usize),
+    Attack(usize),
 }
 
 #[derive(Debug)]
@@ -41,24 +39,30 @@ pub struct ActionQueue {
 }
 
 #[derive(Debug)]
+pub struct EntityTarget {
+    pub id: usize,
+}
+
+#[derive(Debug)]
 pub struct CombatInfo {
-    pub health: u32,
-    pub max_health: u32,
-    pub cognition: u32,
-    pub max_cognition: u32,
-    pub damage: u32,
-    pub absorption: u32,
-    pub dodge: u32,
+    pub health: i32,
+    pub max_health: i32,
+    pub cognition: i32,
+    pub max_cognition: i32,
+    pub damage: i32,
+    pub absorption: i32,
+    pub dodge: i32,
+    pub current_attack: Option<usize>,
 }
 
 // ------------------------------------------------------------
 
 pub struct Entity {
     pub name: &'static str,
-    pub is_player: bool,
     pub logical_pos: Option<LogicalPos>,
     pub render_info: Option<RenderInfo>,
     pub action_queue: Option<ActionQueue>,
+    pub entity_target: Option<EntityTarget>,
     pub combat_info: Option<CombatInfo>,
 }
 

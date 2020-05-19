@@ -1,23 +1,27 @@
 use crate::GameState;
 use core::TileGrid;
+use util::get_next_id;
 use ecs::{Entity, LogicalPos, Action};
 use factory::{Direction, get_walk_anim};
+use path_logic;
 use ai_logic;
 
-pub fn compute_turns(state: &mut GameState) {
-    let ref mut entity = &mut state.entities[state.curr_turn];
+pub fn compute_turns(state: &mut GameState) -> Option<()> {
+    if let None = state.entity_map.get(&state.curr_turn) {
+        increment_turn(state);
+    }
 
-    if let Some(aq) = &entity.action_queue {
+    if let Some(aq) = &state.entity_map.get(&state.curr_turn)?.action_queue {
         if let Some(_) = aq.current {
             // last turn still active, wait for it to be removed
-            return;
+            return Some(());
         } else {
             // compute a turn!
             // Some -> computed new turn successfully
             // None -> blocking, waiting for input, etc...
-            match compute_turn(entity, &state.tile_grid) {
+            match compute_turn(state) {
                 Some(action) => {
-                    perform_action_logic(entity, &action);
+                    perform_action_logic(state.entity_map.get_mut(&state.curr_turn)?, action);
                     increment_turn(state);
                 },
                 None => {},
@@ -28,38 +32,68 @@ pub fn compute_turns(state: &mut GameState) {
         // (it doesn't participate in this system)
         increment_turn(state);
     }
+
+    Some(())
 }
 
 fn increment_turn(state: &mut GameState) {
     state.curr_turn += 1;
-    if state.curr_turn == state.entities.len() {
-        state.curr_turn = 0;
+    if let None = state.entity_map.get(&state.curr_turn) {
+        if state.curr_turn >= get_next_id(&state.entity_map) {
+            state.curr_turn = 0;
+        }
     }
 }
 
-fn compute_turn(entity: &mut Entity, tile_grid: &TileGrid) -> Option<Action> {
+fn compute_turn(state: &mut GameState) -> Option<Action> {
     // ActionQueue component is REQUIRED
-    let aq = entity.action_queue.as_ref()?;
+    let id = state.curr_turn;
+    let aq = state.entity_map.get(&id)?.action_queue.as_ref()?;
 
-    // 1. get_next_action
-    let action = if aq.queue.len() > 0 {
-        entity.action_queue.as_mut()?.queue.remove(0)
-    } else if !entity.is_player {
-        match ai_logic::compute_action(entity, tile_grid) {
-            Some(a) => a,
-            None => return None,
+    if aq.queue.len() > 0 {
+        Some(state.entity_map.get_mut(&id)?.action_queue.as_mut()?.queue.remove(0))
+    } else if let Some(tgt) = state.entity_map.get(&id)?.entity_target.as_ref() {
+        let x = try_target_path(
+            state.entity_map.get(&id)?, state.entity_map.get(&tgt.id)?, &state.tile_grid);
+        if let Some(Action::Move(_, _)) = x {
+            x
+        } else {
+            state.entity_map.get_mut(&id)?.entity_target = None;
+            x
         }
+    } else if id > 0 {
+        ai_logic::compute_action(state.entity_map.get(&id)?, &state.tile_grid)
     } else {
-        return None;
-    };
+        None
+    }
+}
 
-    // 2. process_action
-    // TODO this should be in perform action logic !?!?!?
+fn try_target_path(entity: &Entity, tgt: &Entity, tile_grid: &TileGrid) -> Option<Action> {
+    let lp = entity.logical_pos.as_ref()?;
+    let tgt_lp = tgt.logical_pos.as_ref()?;
+
+    match path_logic::get_path(lp.x, lp.y, tgt_lp.x, tgt_lp.y, &tile_grid) {
+        Some((path, _cost)) => {
+            if path.len() > 2 {
+                Some(Action::Move(path[1].0, path[1].1))
+            } else if path.len() == 2 {
+                Some(Action::Attack(entity.entity_target.as_ref()?.id))
+            } else {
+                None
+            }
+        },
+        None => None,
+    }
+}
+
+fn perform_action_logic(entity: &mut Entity, action: Action) -> Option<()> {
     match action {
-        Action::Move(mx, my) => {
+        Action::Wait => {},//entity.action_queue.as_mut()?.current = None,
+        Action::Move(wx, wy) => {
+            // set animation direction based on move direction
             let logical = entity.logical_pos.as_ref()?;
-            let dx: i32 = (mx - logical.x) as i32;
-            let dy: i32 = (my - logical.y) as i32;
+            let dx: i32 = (wx - logical.x) as i32;
+            let dy: i32 = (wy - logical.y) as i32;
             if let Some(ri) = entity.render_info.as_mut() {
                 if dx > 0 {
                     ri.frames = get_walk_anim(entity.name, &Direction::Right);
@@ -67,7 +101,7 @@ fn compute_turn(entity: &mut Entity, tile_grid: &TileGrid) -> Option<Action> {
                 else if dx < 0 {
                     ri.frames = get_walk_anim(entity.name, &Direction::Left);
                 }
-                else { // dx == 0
+                else {
                     if dy > 0 {
                         ri.frames = get_walk_anim(entity.name, &Direction::Down);
                     }
@@ -76,19 +110,15 @@ fn compute_turn(entity: &mut Entity, tile_grid: &TileGrid) -> Option<Action> {
                     }
                 }
             }
+
+            // PROCESS: set logical position to desired move pos
+            entity.logical_pos = Some(LogicalPos { x: wx, y: wy });
+            
+            entity.action_queue.as_mut()?.current = Some(action);
         },
-        Action::Wait => {},
-    };
-
-    let aq = entity.action_queue.as_mut()?;
-    aq.current = Some(action);
-    return aq.current.clone();
-}
-
-fn perform_action_logic(entity: &mut Entity, action: &Action) -> Option<()> {
-    match action {
-        Action::Move(wx, wy) => entity.logical_pos = Some(LogicalPos { x: *wx, y: *wy }),
-        Action::Wait => entity.action_queue.as_mut()?.current = None,
+        Action::Attack(id) => {
+            entity.combat_info.as_mut()?.current_attack = Some(id);
+        },
     };
 
     Some(())

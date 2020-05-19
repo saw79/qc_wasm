@@ -35,7 +35,7 @@ fn draw_tiles(state: &GameState) {
 }
 
 fn draw_entities(state: &GameState) {
-    for entity in &state.entities {
+    for entity in state.entity_map.values() {
         if let Some(ri) = &entity.render_info {
             draw_entity(state, ri);
         }

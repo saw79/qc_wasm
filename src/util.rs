@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use core::Camera;
 
 pub fn world_to_pixel(w_x: f32, w_y: f32, camera: &Camera) -> (f32, f32) {
@@ -12,5 +14,16 @@ pub fn pixel_to_world(p_x: f32, p_y: f32, camera: &Camera) -> (f32, f32) {
     let w_x = (p_x - (camera.canvas_width as f32)/2.0)/tile_pix + camera.x;
     let w_y = (p_y - (camera.canvas_height as f32)/2.0)/tile_pix + camera.y;
     (w_x, w_y)
+}
+
+pub fn get_next_id<T>(hm: &HashMap<usize, T>) -> usize {
+    let mut max_id: usize = 0;
+    for &id in hm.keys() {
+        if id > max_id {
+            max_id = id;
+        }
+    }
+
+    max_id + 1
 }
 

@@ -2,7 +2,7 @@ use crate::GameState;
 use ecs::Entity;
 
 pub fn compute_animations(state: &mut GameState, dt: f32) {
-    for entity in state.entities.iter_mut() {
+    for entity in state.entity_map.values_mut() {
         compute_animation(entity, dt);
     }
 }

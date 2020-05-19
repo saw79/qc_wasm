@@ -10,7 +10,6 @@ pub enum Direction {
 pub fn create_player(x: u32, y: u32) -> Entity {
     Entity {
         name: "player_none",
-        is_player: true,
         logical_pos: Some(LogicalPos { x: x, y: y }),
         render_info: Some(RenderInfo {
             x: x as f32,
@@ -25,6 +24,7 @@ pub fn create_player(x: u32, y: u32) -> Entity {
             current: None,
             queue: vec![],
         }),
+        entity_target: None,
         combat_info: Some(CombatInfo {
             health: 10,
             max_health: 10,
@@ -33,6 +33,7 @@ pub fn create_player(x: u32, y: u32) -> Entity {
             damage: 1,
             absorption: 0,
             dodge: 0,
+            current_attack: None,
         }),
     }
 }
@@ -40,7 +41,6 @@ pub fn create_player(x: u32, y: u32) -> Entity {
 pub fn create_enemy(x: u32, y: u32, name: &'static str) -> Entity {
     Entity {
         name: name,
-        is_player: false,
         logical_pos: Some(LogicalPos { x: x, y: y }),
         render_info: Some(RenderInfo {
             x: x as f32,
@@ -55,6 +55,7 @@ pub fn create_enemy(x: u32, y: u32, name: &'static str) -> Entity {
             current: None,
             queue: vec![],
         }),
+        entity_target: None,
         combat_info: Some(CombatInfo {
             health: 10,
             max_health: 10,
@@ -63,6 +64,7 @@ pub fn create_enemy(x: u32, y: u32, name: &'static str) -> Entity {
             damage: 1,
             absorption: 0,
             dodge: 0,
+            current_attack: None,
         }),
     }
 }

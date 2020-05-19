@@ -3,9 +3,9 @@ use core::MOVE_SPEED;
 use ecs::{Entity, Action, ActionQueue};
 
 pub fn move_entities(state: &mut GameState, dt: f32) {
-    for entity in state.entities.iter_mut() {
+    for (&id, entity) in state.entity_map.iter_mut() {
         match move_entity(entity, dt) {
-            Some((x, y)) if entity.is_player => {
+            Some((x, y)) if id == 0 => {
                 state.camera.x = x;
                 state.camera.y = y;
             },
