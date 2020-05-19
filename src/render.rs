@@ -3,6 +3,7 @@ use web_sys::CanvasRenderingContext2d;
 use crate::{
     GameState,
     jsDrawImage,
+    jsDrawString,
 };
 
 use core::*;
@@ -13,6 +14,7 @@ pub fn draw_all(state: &GameState) {
     clear(state);
     draw_tiles(state);
     draw_entities(state);
+    draw_floating_text(state);
 }
 
 fn clear(state: &GameState) {
@@ -81,5 +83,12 @@ fn draw_entity(ctx: &CanvasRenderingContext2d, entity: &Entity, camera: &Camera,
     }
 
     Some(())
+}
+
+fn draw_floating_text(state: &GameState) {
+    for ft in &state.floating_texts {
+        let (px, py) = world_to_pixel(ft.x, ft.y, &state.camera);
+        jsDrawString(&state.ctx, &ft.text, px, py);
+    }
 }
 

@@ -1,4 +1,6 @@
 use crate::GameState;
+use constants::FLOATING_TEXT_TIME;
+use core::FloatingText;
 use util::get_next_id;
 
 use debug::log;
@@ -22,6 +24,16 @@ fn process_attack(state: &mut GameState, id: usize) -> Option<()> {
     }
 
     state.entity_map.get_mut(&id)?.combat_info.as_mut()?.current_attack = None;
+
+    let tgt_ri = state.entity_map.get(&tgt_id)?.render_info.as_ref()?;
+    state.floating_texts.push(FloatingText {
+        text: dmg.to_string(),
+        total_time: FLOATING_TEXT_TIME,
+        curr_time: 0.0,
+        x: tgt_ri.x,
+        y: tgt_ri.y,
+    });
+
     Some(())
 }
 

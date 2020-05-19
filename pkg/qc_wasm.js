@@ -1,4 +1,4 @@
-import { jsDrawImage } from '../app.js';
+import { jsDrawImage, jsDrawString } from '../app.js';
 
 let wasm;
 
@@ -159,14 +159,17 @@ async function init(input) {
         var ret = getStringFromWasm0(arg0, arg1);
         return addHeapObject(ret);
     };
-    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
-        takeObject(arg0);
+    imports.wbg.__wbg_log_a08e1d56c9bc87ac = function(arg0, arg1) {
+        console.log(getStringFromWasm0(arg0, arg1));
     };
     imports.wbg.__wbg_jsDrawImage_d97f6f4af62177d1 = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11) {
         jsDrawImage(getObject(arg0), getStringFromWasm0(arg1, arg2), arg3 >>> 0, arg4 >>> 0, arg5 >>> 0, arg6 >>> 0, arg7, arg8, arg9, arg10, arg11 !== 0);
     };
-    imports.wbg.__wbg_log_a08e1d56c9bc87ac = function(arg0, arg1) {
-        console.log(getStringFromWasm0(arg0, arg1));
+    imports.wbg.__wbg_jsDrawString_5b666f900490124e = function(arg0, arg1, arg2, arg3, arg4) {
+        jsDrawString(getObject(arg0), getStringFromWasm0(arg1, arg2), arg3, arg4);
+    };
+    imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
+        takeObject(arg0);
     };
     imports.wbg.__wbg_getRandomValues_f5e14ab7ac8e995d = function(arg0, arg1, arg2) {
         getObject(arg0).getRandomValues(getArrayU8FromWasm0(arg1, arg2));

@@ -29,6 +29,13 @@ export function jsDrawImage(ctx, imgName, sx, sy, sw, sh, x, y, w, h, pixel_fix)
   }
 }
 
+export function jsDrawString(ctx, s, x, y) {
+    ctx.font = "32px Impact";
+    ctx.fillStyle = "red";
+    ctx.textAlign = "center";
+    ctx.fillText(s, x, y);
+}
+
 async function run() {
   await init();
 

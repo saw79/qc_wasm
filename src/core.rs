@@ -1,5 +1,3 @@
-pub const MOVE_SPEED: f32 = 10.0; // tiles/s
-
 const Y_TILES: u32 = 20;
 
 #[derive(Clone, PartialEq)]
@@ -75,5 +73,13 @@ impl Camera {
             tile_pix: canvas_h / Y_TILES,
         }
     }
+}
+
+pub struct FloatingText {
+    pub text: String,
+    pub total_time: f32,
+    pub curr_time: f32,
+    pub x: f32,
+    pub y: f32,
 }
 

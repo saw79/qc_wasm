@@ -12,6 +12,7 @@ use web_sys::CanvasRenderingContext2d;
 mod debug;
 use debug::log;
 
+mod constants;
 mod core;
 mod ecs;
 mod util;
@@ -31,6 +32,7 @@ extern "C" {
                    sx: u32, sy: u32, sw: u32, sh: u32,
                    x: f32, y: f32, w: f32, h: f32,
                    pixel_fix: bool);
+    fn jsDrawString(ctx: &CanvasRenderingContext2d, text: &str, x: f32, y: f32);
 }
 
 #[wasm_bindgen]
@@ -43,6 +45,7 @@ pub struct GameState {
     last_click_pos: (u32, u32),
     last_camera_pos: (f32, f32),
     paused: bool,
+    floating_texts: Vec<core::FloatingText>,
 }
 
 
@@ -70,6 +73,7 @@ impl GameState {
             last_click_pos: (0, 0),
             last_camera_pos: (0.0, 0.0),
             paused: false,
+            floating_texts: vec![],
         }
     }
 
@@ -169,6 +173,7 @@ impl GameState {
         turn_logic::compute_turns(self);
         combat_logic::process_combat(self);
         movement::move_entities(self, dt);
+        movement::move_floating_texts(self, dt);
         animation_logic::compute_animations(self, dt);
     }
 

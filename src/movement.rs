@@ -1,5 +1,5 @@
 use crate::GameState;
-use core::MOVE_SPEED;
+use constants::{MOVE_SPEED, FLOATING_TEXT_SPEED};
 use ecs::{Entity, Action, ActionQueue};
 
 pub fn move_entities(state: &mut GameState, dt: f32) {
@@ -12,6 +12,15 @@ pub fn move_entities(state: &mut GameState, dt: f32) {
             _ => {},
         };
     }
+}
+
+pub fn move_floating_texts(state: &mut GameState, dt: f32) {
+    for ft in &mut state.floating_texts {
+        ft.y -= FLOATING_TEXT_SPEED * dt;
+        ft.curr_time += dt;
+    }
+
+    state.floating_texts.retain(|ft| ft.curr_time < ft.total_time);
 }
 
 fn move_entity(entity: &mut Entity, dt: f32) -> Option<(f32, f32)> {
