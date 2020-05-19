@@ -18,6 +18,7 @@ function loadAllImages() {
   assets["status_cover"] = loadImage("assets/status_cover.png");
   assets["health_fill"] = loadImage("assets/health_fill.png");
   assets["cog_fill"] = loadImage("assets/cog_fill.png");
+  assets["health_bar"] = loadImage("assets/health_bar.png");
 }
 
 export function jsDrawImage(ctx, imgName, sx, sy, sw, sh, x, y, w, h, pixel_fix) {

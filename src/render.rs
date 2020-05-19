@@ -1,3 +1,5 @@
+use web_sys::CanvasRenderingContext2d;
+
 use crate::{
     GameState,
     jsDrawImage,
@@ -35,10 +37,8 @@ fn draw_tiles(state: &GameState) {
 }
 
 fn draw_entities(state: &GameState) {
-    for entity in state.entity_map.values() {
-        if let Some(ri) = &entity.render_info {
-            draw_entity(state, ri);
-        }
+    for (id, entity) in &state.entity_map {
+        draw_entity(&state.ctx, entity, &state.camera, *id > 0);
     }
 }
 
@@ -50,21 +50,36 @@ fn draw_tile(state: &GameState, wx: f32, wy: f32, tile_type: &TileType) {
         TileType::DOORCLOSED => (32, 0),
         TileType::DOOROPEN => (32, 32),
     };
-    let tile_pix = state.camera.tile_pix;
+    let tile_pix = state.camera.tile_pix as f32;
     jsDrawImage(&state.ctx, "prison_tiles",
                 sx, sy, 32, 32,
-                px as f32, py as f32, tile_pix as f32, tile_pix as f32, true);
+                px as f32, py as f32, tile_pix, tile_pix, true);
 }
 
-fn draw_entity(state: &GameState, ri: &RenderInfo) {
-    let (px, py) = world_to_pixel(ri.x, ri.y, &state.camera);
+//fn draw_entity(state: &GameState, ri: &RenderInfo) {
+fn draw_entity(ctx: &CanvasRenderingContext2d, entity: &Entity, camera: &Camera, draw_health: bool)
+    -> Option<()> {
+    let ri = entity.render_info.as_ref()?;
 
-    let tile_pix = state.camera.tile_pix;
+    let (px, py) = world_to_pixel(ri.x, ri.y, camera);
+
+    let tile_pix = camera.tile_pix as f32;
     if ri.curr_frame < ri.frames.len() {
         let rf = &ri.frames[ri.curr_frame];
-        jsDrawImage(&state.ctx, rf.sheet_name,
+        jsDrawImage(ctx, rf.sheet_name,
                     rf.sheet_x, rf.sheet_y, rf.sheet_w, rf.sheet_h,
-                    px, py, tile_pix as f32, tile_pix as f32, false);
+                    px, py, tile_pix, tile_pix, false);
     }
+
+    // health bar
+    if draw_health {
+        let ci = entity.combat_info.as_ref()?;
+        let hbw = ci.health as f32 / ci.max_health as f32 * tile_pix;
+        jsDrawImage(ctx, "health_bar",
+                    0, 0, 100, 20,
+                    px+(tile_pix - hbw)/2.0, py-tile_pix/20.0, hbw, tile_pix/10.0, false);
+    }
+
+    Some(())
 }
 
