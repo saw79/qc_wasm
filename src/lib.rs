@@ -76,7 +76,10 @@ impl GameState {
     // ------- public functions ---------------------
 
     pub fn tick(&mut self, dt_ms: f32) {
-        self.update(dt_ms/1000.0);
+        if !self.paused {
+            self.update(dt_ms/1000.0);
+        }
+
         self.render();
     }
 
@@ -84,6 +87,7 @@ impl GameState {
         if is_down {
             self.last_click_pos = (mx, my);
             self.last_camera_pos = (self.camera.x, self.camera.y);
+            self.paused = true;
         } else {
             let (mx0, my0) = self.last_click_pos;
             let dx = (mx as i32 - mx0 as i32).abs();
@@ -92,6 +96,7 @@ impl GameState {
                 let (wx, wy) = util::pixel_to_world(mx as f32, my as f32, &self.camera);
                 self.process_click(wx as u32, wy as u32);
             }
+            self.paused = false;
         }
     }
 
