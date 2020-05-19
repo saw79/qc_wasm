@@ -7,7 +7,7 @@ pub enum Direction {
     Right,
 }
 
-pub fn create_player(x: u32, y: u32) -> Entity {
+pub fn create_player(x: i32, y: i32) -> Entity {
     Entity {
         name: "player_none",
         logical_pos: Some(LogicalPos { x: x, y: y }),
@@ -38,7 +38,7 @@ pub fn create_player(x: u32, y: u32) -> Entity {
     }
 }
 
-pub fn create_enemy(x: u32, y: u32, name: &'static str) -> Entity {
+pub fn create_enemy(x: i32, y: i32, name: &'static str) -> Entity {
     Entity {
         name: name,
         logical_pos: Some(LogicalPos { x: x, y: y }),

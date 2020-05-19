@@ -21,7 +21,11 @@ pub fn compute_turns(state: &mut GameState) -> Option<()> {
             // None -> blocking, waiting for input, etc...
             match compute_turn(state) {
                 Some(action) => {
-                    perform_action_logic(state.entity_map.get_mut(&state.curr_turn)?, action);
+                    perform_action_logic(
+                        state.entity_map.get_mut(&state.curr_turn)?,
+                        action,
+                        &mut state.tile_grid,
+                        state.curr_turn == 0);
                     increment_turn(state);
                 },
                 None => {},
@@ -86,14 +90,14 @@ fn try_target_path(entity: &Entity, tgt: &Entity, tile_grid: &TileGrid) -> Optio
     }
 }
 
-fn perform_action_logic(entity: &mut Entity, action: Action) -> Option<()> {
+fn perform_action_logic(entity: &mut Entity, action: Action, tile_grid: &mut TileGrid, is_player: bool) -> Option<()> {
     match action {
         Action::Wait => {},//entity.action_queue.as_mut()?.current = None,
-        Action::Move(wx, wy) => {
+        Action::Move(move_x, move_y) => {
             // set animation direction based on move direction
             let logical = entity.logical_pos.as_ref()?;
-            let dx: i32 = (wx - logical.x) as i32;
-            let dy: i32 = (wy - logical.y) as i32;
+            let dx: i32 = (move_x - logical.x) as i32;
+            let dy: i32 = (move_y - logical.y) as i32;
             if let Some(ri) = entity.render_info.as_mut() {
                 if dx > 0 {
                     ri.frames = get_walk_anim(entity.name, &Direction::Right);
@@ -112,7 +116,11 @@ fn perform_action_logic(entity: &mut Entity, action: Action) -> Option<()> {
             }
 
             // PROCESS: set logical position to desired move pos
-            entity.logical_pos = Some(LogicalPos { x: wx, y: wy });
+            entity.logical_pos = Some(LogicalPos { x: move_x, y: move_y });
+
+            if is_player {
+                tile_grid.update_visibility(move_x, move_y);
+            }
             
             entity.action_queue.as_mut()?.current = Some(action);
         },

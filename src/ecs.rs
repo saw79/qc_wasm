@@ -1,8 +1,8 @@
 
 #[derive(Debug, Clone)]
 pub struct LogicalPos {
-    pub x: u32,
-    pub y: u32,
+    pub x: i32,
+    pub y: i32,
 }
 
 #[derive(Debug)]
@@ -28,7 +28,7 @@ pub struct RenderInfo {
 #[derive(Debug, Clone)]
 pub enum Action {
     Wait,
-    Move(u32, u32),
+    Move(i32, i32),
     Attack(usize),
 }
 

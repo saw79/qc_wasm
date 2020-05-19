@@ -3,12 +3,11 @@ use pathfinding::prelude::{absdiff, astar};
 use core::{TileType, TileGrid};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Pos(pub u32, pub u32);
+pub struct Pos(pub i32, pub i32);
 
 impl Pos {
     fn distance(&self, other: &Pos) -> u32 {
-        //(absdiff(self.0, other.0) + absdiff(self.1, other.1)) as u32
-        absdiff(self.0, other.0) + absdiff(self.1, other.1)
+        (absdiff(self.0, other.0) + absdiff(self.1, other.1)) as u32
     }
 
     fn neighbors(&self, tile_grid: &TileGrid) -> Vec<(Pos, u32)> {
@@ -20,12 +19,12 @@ impl Pos {
                     continue
                 }
 
-                let nx: i32 = x as i32 + dx;
-                let ny: i32 = y as i32 + dy;
+                let nx = x + dx;
+                let ny = y + dy;
                 if nx >= 0 && nx < tile_grid.width as i32 &&
                    ny >= 0 && ny < tile_grid.height as i32 &&
                    *tile_grid.at(nx, ny) != TileType::WALL {
-                    nbs.push(Pos(nx as u32, ny as u32));
+                    nbs.push(Pos(nx, ny));
                 }
             }
         }
@@ -35,8 +34,8 @@ impl Pos {
 }
 
 pub fn get_path(
-    x0: u32, y0: u32,
-    x1: u32, y1: u32,
+    x0: i32, y0: i32,
+    x1: i32, y1: i32,
     tile_grid: &TileGrid)
     -> Option<(Vec<Pos>, u32)> {
     //

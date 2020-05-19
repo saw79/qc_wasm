@@ -25,14 +25,18 @@ mod turn_logic;
 mod animation_logic;
 mod ai_logic;
 mod combat_logic;
+mod bresenham;
 
 #[wasm_bindgen(raw_module = "../app.js")]
 extern "C" {
     fn jsDrawImage(ctx: &CanvasRenderingContext2d, imgName: &str,
                    sx: u32, sy: u32, sw: u32, sh: u32,
-                   x: f32, y: f32, w: f32, h: f32,
-                   pixel_fix: bool);
-    fn jsDrawString(ctx: &CanvasRenderingContext2d, text: &str, x: f32, y: f32);
+                   x: u32, y: u32, w: u32, h: u32);
+    fn jsDrawImageAlpha(ctx: &CanvasRenderingContext2d, imgName: &str,
+                        sx: u32, sy: u32, sw: u32, sh: u32,
+                        x: u32, y: u32, w: u32, h: u32,
+                        alpha: f32);
+    fn jsDrawString(ctx: &CanvasRenderingContext2d, text: &str, x: u32, y: u32);
 }
 
 #[wasm_bindgen]
@@ -60,6 +64,9 @@ impl GameState {
         camera.x = px as f32;
         camera.y = py as f32;
 
+        let mut tile_grid = core::TileGrid::new(40, 40);
+        tile_grid.update_visibility(px, py);
+
         let mut entity_map = HashMap::new();
         entity_map.insert(0, factory::create_player(px, py));
         entity_map.insert(1, factory::create_enemy(10, 10, "prison_guard"));
@@ -67,7 +74,7 @@ impl GameState {
         GameState {
             ctx: ctx,
             camera: camera,
-            tile_grid: core::TileGrid::new(40, 40),
+            tile_grid: tile_grid,
             entity_map: entity_map,
             curr_turn: 0,
             last_click_pos: (0, 0),
@@ -96,9 +103,9 @@ impl GameState {
             let (mx0, my0) = self.last_click_pos;
             let dx = (mx as i32 - mx0 as i32).abs();
             let dy = (my as i32 - my0 as i32).abs();
-            if dx + dy < 10 {
-                let (wx, wy) = util::pixel_to_world(mx as f32, my as f32, &self.camera);
-                self.process_click(wx as u32, wy as u32);
+            if dx + dy < 20 {
+                let (wx, wy) = util::pixel_to_world(mx, my, &self.camera);
+                self.process_click(wx, wy);
             }
             self.paused = false;
         }
@@ -119,7 +126,7 @@ impl GameState {
 
     // ------- internal functions ---------------------
 
-    fn process_click(&mut self, wx: u32, wy: u32) -> Option<()> {
+    fn process_click(&mut self, wx: f32, wy: f32) -> Option<()> {
         // if has actions, this click means ABORT
         if let Some(aq) = &mut self.entity_map.get_mut(&0)?.action_queue {
             if aq.queue.len() > 0 {
@@ -132,20 +139,22 @@ impl GameState {
         let x0 = self.entity_map.get(&0)?.logical_pos.as_ref()?.x;
         let y0 = self.entity_map.get(&0)?.logical_pos.as_ref()?.y;
 
-        if x0 == wx && y0 == wy {
+        let wx_int = wx as i32;
+        let wy_int = wy as i32;
+
+        if x0 == wx_int && y0 == wy_int {
             // self click
-            self.entity_map.get_mut(&0)?.action_queue.as_mut()
-                .map(|aq| aq.queue.push(ecs::Action::Wait));
+            self.process_self_click();
         }
         else {
             let mut clicked_enemy = false;
-            if let Some(i) = self.get_entity_at(wx, wy) {
-                self.entity_map.get_mut(&0)?.entity_target = Some(ecs::EntityTarget { id: i });
+            if let Some(id) = self.get_entity_at(wx_int, wy_int) {
+                self.entity_map.get_mut(&0)?.entity_target = Some(ecs::EntityTarget { id: id });
                 clicked_enemy = true;
             }
 
             // check path, either move or attack enemy
-            match path_logic::get_path(x0, y0, wx, wy, &self.tile_grid) {
+            match path_logic::get_path(x0, y0, wx_int, wy_int, &self.tile_grid) {
                 Some((mut path, _cost)) => {
                     path.remove(0);
                     if path.len() == 0 {
@@ -169,6 +178,13 @@ impl GameState {
         Some(())
     }
 
+    fn process_self_click(&mut self) -> Option<()> {
+        self.entity_map.get_mut(&0)?.action_queue.as_mut()
+            .map(|aq| aq.queue.push(ecs::Action::Wait));
+
+        Some(())
+    }
+
     fn update(&mut self, dt: f32) {
         turn_logic::compute_turns(self);
         combat_logic::process_combat(self);
@@ -182,7 +198,7 @@ impl GameState {
         render_ui::draw_ui(self);
     }
 
-    fn get_entity_at(&self, x: u32, y: u32) -> Option<usize> {
+    fn get_entity_at(&self, x: i32, y: i32) -> Option<usize> {
         for (&id, entity) in &self.entity_map {
             if id == 0 { continue; }
 

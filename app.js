@@ -21,12 +21,14 @@ function loadAllImages() {
   assets["health_bar"] = loadImage("assets/health_bar.png");
 }
 
-export function jsDrawImage(ctx, imgName, sx, sy, sw, sh, x, y, w, h, pixel_fix) {
-  if (pixel_fix) {
-    ctx.drawImage(assets[imgName], sx, sy, sw, sh, x-1, y-1, w+2, h+2);
-  } else {
-    ctx.drawImage(assets[imgName], sx, sy, sw, sh, x, y, w, h);
-  }
+export function jsDrawImage(ctx, imgName, sx, sy, sw, sh, x, y, w, h) {
+  ctx.drawImage(assets[imgName], sx, sy, sw, sh, x, y, w, h);
+}
+
+export function jsDrawImageAlpha(ctx, imgName, sx, sy, sw, sh, x, y, w, h, alpha) {
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(assets[imgName], sx, sy, sw, sh, x, y, w, h);
+  ctx.globalAlpha = 1;
 }
 
 export function jsDrawString(ctx, s, x, y) {
