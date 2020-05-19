@@ -37,6 +37,9 @@ pub struct GameState {
     tile_grid: core::TileGrid,
     entities: Vec<ecs::Entity>,
     curr_turn: usize,
+    last_click_pos: (u32, u32),
+    last_camera_pos: (f32, f32),
+    paused: bool,
 }
 
 
@@ -62,6 +65,9 @@ impl GameState {
             tile_grid: core::TileGrid::new(40, 40),
             entities: entities,
             curr_turn: 0,
+            last_click_pos: (0, 0),
+            last_camera_pos: (0.0, 0.0),
+            paused: false,
         }
     }
 
@@ -72,18 +78,38 @@ impl GameState {
         self.render();
     }
 
-    pub fn add_mouse_click(&mut self, mx: u32, my: u32) {
-        let (wx, wy) = util::pixel_to_world(mx as f32, my as f32, &self.camera);
-        self.process_new_target(wx as u32, wy as u32);
+    pub fn receive_click(&mut self, mx: u32, my: u32, is_down: bool) {
+        if is_down {
+            self.last_click_pos = (mx, my);
+            self.last_camera_pos = (self.camera.x, self.camera.y);
+        } else {
+            let (mx0, my0) = self.last_click_pos;
+            let dx = (mx as i32 - mx0 as i32).abs();
+            let dy = (my as i32 - my0 as i32).abs();
+            if dx + dy < 10 {
+                let (wx, wy) = util::pixel_to_world(mx as f32, my as f32, &self.camera);
+                self.process_click(wx as u32, wy as u32);
+            }
+        }
     }
 
-    pub fn add_key_press(&mut self, code: u32) {
+    pub fn receive_drag(&mut self, mx: u32, my: u32) {
+        let (mx0, my0) = self.last_click_pos;
+        let (cx0, cy0) = self.last_camera_pos;
+        let dx: f32 = (mx0 as f32 - mx as f32) / self.camera.tile_pix as f32;
+        let dy: f32 = (my0 as f32 - my as f32) / self.camera.tile_pix as f32;
+        self.camera.x = cx0 + dx;
+        self.camera.y = cy0 + dy;
+    }
+
+    pub fn receive_key(&mut self, code: u32) {
         console_log!("rust received code: {}", code);
     }
 
     // ------- internal functions ---------------------
 
-    fn process_new_target(&mut self, wx: u32, wy: u32) -> Option<()> {
+    fn process_click(&mut self, wx: u32, wy: u32) -> Option<()> {
+        // if has actions, this click means ABORT
         if let Some(ref mut aq) = &mut self.entities[0].action_queue {
             if aq.queue.len() > 0 {
                 aq.queue.clear();
@@ -91,31 +117,36 @@ impl GameState {
             }
         }
 
+        // current position needed for everything
         let x0 = self.entities[0].logical_pos.as_ref()?.x;
         let y0 = self.entities[0].logical_pos.as_ref()?.y;
 
-        match path_logic::get_path(x0, y0, wx, wy, &self.tile_grid) {
-            Some((mut path, _cost)) => {
-                path.remove(0);
-                let new_q = path.into_iter().map(|p| ecs::Action::Move(p.0, p.1)).collect();
-                self.entities[0].action_queue.as_mut().map(|mut aq| aq.queue = new_q);
-            },
-            None => console_log!("  no path"),
-        };
+        if x0 == wx && y0 == wy {
+            // self click
+            self.entities[0].action_queue.as_mut()
+                .map(|aq| aq.queue.push(ecs::Action::Wait));
+        }
+        else {
+            // check path, either move or attack enemy
+            match path_logic::get_path(x0, y0, wx, wy, &self.tile_grid) {
+                Some((mut path, _cost)) => {
+                    path.remove(0);
+                    let new_q = path.into_iter().map(|p| ecs::Action::Move(p.0, p.1)).collect();
+                    self.entities[0].action_queue.as_mut().map(|aq| aq.queue = new_q);
+                },
+                None => console_log!("  no path"),
+            };
+        }
 
         Some(())
     }
 
-    fn update(&mut self, dt: f32) -> Option<()> {
+    fn update(&mut self, dt: f32) {
         turn_logic::compute_turns(self);
 
         movement::move_entities(self, dt);
-        self.camera.x = self.entities[0].render_info.as_ref()?.x;
-        self.camera.y = self.entities[0].render_info.as_ref()?.y;
 
         animation_logic::compute_animations(self, dt);
-
-        Some(())
     }
 
     fn render(&mut self) {

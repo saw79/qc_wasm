@@ -4,11 +4,8 @@ use ecs::{Entity, LogicalPos, Action};
 use factory::{Direction, get_walk_anim};
 use ai_logic;
 
-use debug::log;
-
 pub fn compute_turns(state: &mut GameState) {
     let ref mut entity = &mut state.entities[state.curr_turn];
-    let is_player = state.curr_turn == 0;
 
     if let Some(aq) = &entity.action_queue {
         if let Some(_) = aq.current {
@@ -18,7 +15,7 @@ pub fn compute_turns(state: &mut GameState) {
             // compute a turn!
             // Some -> computed new turn successfully
             // None -> blocking, waiting for input, etc...
-            match compute_turn(entity, &state.tile_grid, is_player) {
+            match compute_turn(entity, &state.tile_grid) {
                 Some(action) => {
                     perform_action_logic(entity, &action);
                     increment_turn(state);
@@ -40,14 +37,14 @@ fn increment_turn(state: &mut GameState) {
     }
 }
 
-fn compute_turn(entity: &mut Entity, tile_grid: &TileGrid, is_player: bool) -> Option<Action> {
+fn compute_turn(entity: &mut Entity, tile_grid: &TileGrid) -> Option<Action> {
     // ActionQueue component is REQUIRED
     let aq = entity.action_queue.as_ref()?;
 
     // 1. get_next_action
     let action = if aq.queue.len() > 0 {
         entity.action_queue.as_mut()?.queue.remove(0)
-    } else if !is_player {
+    } else if !entity.is_player {
         match ai_logic::compute_action(entity, tile_grid) {
             Some(a) => a,
             None => return None,
@@ -57,6 +54,7 @@ fn compute_turn(entity: &mut Entity, tile_grid: &TileGrid, is_player: bool) -> O
     };
 
     // 2. process_action
+    // TODO this should be in perform action logic !?!?!?
     match action {
         Action::Move(mx, my) => {
             let logical = entity.logical_pos.as_ref()?;
@@ -79,7 +77,7 @@ fn compute_turn(entity: &mut Entity, tile_grid: &TileGrid, is_player: bool) -> O
                 }
             }
         },
-        _ => {},
+        Action::Wait => {},
     };
 
     let aq = entity.action_queue.as_mut()?;
@@ -87,10 +85,12 @@ fn compute_turn(entity: &mut Entity, tile_grid: &TileGrid, is_player: bool) -> O
     return aq.current.clone();
 }
 
-fn perform_action_logic(entity: &mut Entity, action: &Action) {
+fn perform_action_logic(entity: &mut Entity, action: &Action) -> Option<()> {
     match action {
         Action::Move(wx, wy) => entity.logical_pos = Some(LogicalPos { x: *wx, y: *wy }),
-        _ => console_log!("UNIMPLEMENTED ACTION"),
+        Action::Wait => entity.action_queue.as_mut()?.current = None,
     };
+
+    Some(())
 }
 

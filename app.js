@@ -55,24 +55,48 @@ async function run() {
   loadAllImages();
 
   var state = new GameState(ctx2, width, height);
+  var mouseDown = false;
 
-  function handleClick(cx, cy) {
+  function handleClick(cx, cy, is_down) {
     let rect = canvas.getBoundingClientRect();
     let x = cx - rect.left;
     let y = cy - rect.top;
-    state.add_mouse_click(x, y);
+    state.receive_click(x, y, is_down);
   }
 
+  function handleDrag(cx, cy) {
+    let rect = canvas.getBoundingClientRect();
+    let x = cx - rect.left;
+    let y = cy - rect.top;
+    state.receive_drag(x, y);
+  }
+
+  canvas.addEventListener("mousedown", function (e) {
+    handleClick(e.clientX, e.clientY, true);
+    mouseDown = true;
+  });
   canvas.addEventListener("mouseup", function (e) {
-    handleClick(e.clientX, e.clientY);
+    handleClick(e.clientX, e.clientY, false);
+    mouseDown = false;
+  });
+  canvas.addEventListener("mousemove", function(e) {
+    if (mouseDown) {
+      handleDrag(e.clientX, e.clientY);
+    }
+  });
+  canvas.addEventListener("touchstart", function (e) {
+    handleClick(e.changedTouches[0].clientX, e.changedTouches[0].clientY, true);
+    e.preventDefault();
+    mouseDown = true;
   });
   canvas.addEventListener("touchend", function (e) {
-    handleClick(e.changedTouches[0].clientX, e.changedTouches[0].clientY);
+    handleClick(e.changedTouches[0].clientX, e.changedTouches[0].clientY, false);
     e.preventDefault();
+    mouseDown = false;
   });
 
   window.addEventListener("keypress", function(e) {
-    state.add_key_press(e.keyCode);
+    state.receive_key(e.keyCode);
   });
 
   // ----------- start loop ----------------

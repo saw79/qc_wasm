@@ -96,15 +96,23 @@ export class GameState {
     /**
     * @param {number} mx
     * @param {number} my
+    * @param {boolean} is_down
     */
-    add_mouse_click(mx, my) {
-        wasm.gamestate_add_mouse_click(this.ptr, mx, my);
+    receive_click(mx, my, is_down) {
+        wasm.gamestate_receive_click(this.ptr, mx, my, is_down);
+    }
+    /**
+    * @param {number} mx
+    * @param {number} my
+    */
+    receive_drag(mx, my) {
+        wasm.gamestate_receive_drag(this.ptr, mx, my);
     }
     /**
     * @param {number} code
     */
-    add_key_press(code) {
-        wasm.gamestate_add_key_press(this.ptr, code);
+    receive_key(code) {
+        wasm.gamestate_receive_key(this.ptr, code);
     }
 }
 

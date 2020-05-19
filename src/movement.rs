@@ -4,11 +4,17 @@ use ecs::{Entity, Action, ActionQueue};
 
 pub fn move_entities(state: &mut GameState, dt: f32) {
     for entity in state.entities.iter_mut() {
-        move_entity(entity, dt);
+        match move_entity(entity, dt) {
+            Some((x, y)) if entity.is_player => {
+                state.camera.x = x;
+                state.camera.y = y;
+            },
+            _ => {},
+        };
     }
 }
 
-fn move_entity(entity: &mut Entity, dt: f32) -> Option<()> {
+fn move_entity(entity: &mut Entity, dt: f32) -> Option<(f32, f32)> {
     let action_queue: &mut ActionQueue = entity.action_queue.as_mut()?;
 
     match action_queue.current {
@@ -42,12 +48,14 @@ fn move_entity(entity: &mut Entity, dt: f32) -> Option<()> {
                     action_queue.current = None;
                     ri.active = false;
                 }
+
+                Some((ri.x, ri.y))
+            } else {
+                None
             }
         },
-        _ => {},
+        _ => None
     }
-
-    Some(())
 }
 
 fn sign(x: f32) -> i32 {

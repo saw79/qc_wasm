@@ -29,8 +29,9 @@ pub struct RenderInfo {
 
 #[derive(Debug, Clone)]
 pub enum Action {
+    Wait,
     Move(u32, u32),
-    Attack,
+    //Attack(usize),
 }
 
 #[derive(Debug)]
@@ -54,6 +55,7 @@ pub struct CombatInfo {
 
 pub struct Entity {
     pub name: &'static str,
+    pub is_player: bool,
     pub logical_pos: Option<LogicalPos>,
     pub render_info: Option<RenderInfo>,
     pub action_queue: Option<ActionQueue>,
