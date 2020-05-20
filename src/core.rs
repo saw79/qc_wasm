@@ -1,9 +1,15 @@
-use constants::VISION_MAX;
+use constants::PLAYER_VISION;
 use bresenham::get_line;
 
-use debug::log;
-
 const Y_TILES: i32 = 20;
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum Direction {
+    Up,
+    Down,
+    Left,
+    Right,
+}
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TileType {
@@ -88,7 +94,7 @@ impl TileGrid {
                 }
 
                 // fill in potential VISIBLE's
-                if (x - x0).abs() <= VISION_MAX && (y - y0).abs() <= VISION_MAX {
+                if (x - x0).abs() <= PLAYER_VISION && (y - y0).abs() <= PLAYER_VISION {
                     let line = get_line(x0, y0, x, y);
                     for (xi, yi) in line {
                         self.set_visibility(xi, yi, Visibility::VISIBLE);

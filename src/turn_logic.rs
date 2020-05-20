@@ -1,8 +1,8 @@
 use crate::GameState;
-use core::TileGrid;
+use core::{Direction, TileGrid};
 use util::get_next_id;
 use ecs::{Entity, LogicalPos, Action};
-use factory::{Direction, get_walk_anim};
+use factory::{get_walk_anim};
 use path_logic;
 use ai_logic;
 
@@ -98,25 +98,37 @@ fn perform_action_logic(entity: &mut Entity, action: Action, tile_grid: &mut Til
             let logical = entity.logical_pos.as_ref()?;
             let dx: i32 = (move_x - logical.x) as i32;
             let dy: i32 = (move_y - logical.y) as i32;
-            if let Some(ri) = entity.render_info.as_mut() {
-                if dx > 0 {
-                    ri.frames = get_walk_anim(entity.name, &Direction::Right);
+            let dir_opt = if let Some(ri) = entity.render_info.as_mut() {
+                let dir = if dx > 0 {
+                    Direction::Right
                 }
                 else if dx < 0 {
-                    ri.frames = get_walk_anim(entity.name, &Direction::Left);
+                    Direction::Left
                 }
                 else {
                     if dy > 0 {
-                        ri.frames = get_walk_anim(entity.name, &Direction::Down);
+                        Direction::Down
                     }
                     else {
-                        ri.frames = get_walk_anim(entity.name, &Direction::Up);
+                        Direction::Up
                     }
-                }
-            }
+                };
+                ri.frames = get_walk_anim(entity.name, &dir);
+                Some(dir)
+            } else {
+                None
+            };
 
-            // PROCESS: set logical position to desired move pos
+            // PROCESS
+            // set logical position to desired move pos
             entity.logical_pos = Some(LogicalPos { x: move_x, y: move_y });
+            // set enemy vision wedge direction
+            if let Some(vw) = entity.vision_wedge.as_mut() {
+                match dir_opt {
+                    Some(dir) => vw.dir = dir,
+                    None => {},
+                };
+            }
 
             if is_player {
                 tile_grid.update_visibility(move_x, move_y);

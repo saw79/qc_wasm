@@ -1,16 +1,12 @@
+use constants::ENEMY_VISION;
+use core::Direction;
 use ecs::*;
-
-pub enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
-}
 
 pub fn create_player(x: i32, y: i32) -> Entity {
     Entity {
         name: "player_none",
         logical_pos: Some(LogicalPos { x: x, y: y }),
+        vision_wedge: None,
         render_info: Some(RenderInfo {
             x: x as f32,
             y: y as f32,
@@ -39,9 +35,12 @@ pub fn create_player(x: i32, y: i32) -> Entity {
 }
 
 pub fn create_enemy(x: i32, y: i32, name: &'static str) -> Entity {
+    let dir = Direction::Down;
+
     Entity {
         name: name,
         logical_pos: Some(LogicalPos { x: x, y: y }),
+        vision_wedge: Some(VisionWedge { radius: ENEMY_VISION, dir: dir.clone() }),
         render_info: Some(RenderInfo {
             x: x as f32,
             y: y as f32,
@@ -49,7 +48,7 @@ pub fn create_enemy(x: i32, y: i32, name: &'static str) -> Entity {
             time: 0.0,
             frame_duration: 0.1,
             curr_frame: 0,
-            frames: get_walk_anim(name, &Direction::Down),
+            frames: get_walk_anim(name, &dir),
         }),
         action_queue: Some(ActionQueue {
             current: None,

@@ -1,4 +1,4 @@
-import { jsDrawImage, jsAlphaToMain, jsDrawString } from '../app.js';
+import { jsDrawImage, jsDrawImageAlpha, jsAlphaToMain, jsDrawString } from '../app.js';
 
 let wasm;
 
@@ -166,6 +166,9 @@ async function init(input) {
     imports.wbg.__wbg_jsDrawImage_d97f6f4af62177d1 = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) {
         jsDrawImage(getObject(arg0), getStringFromWasm0(arg1, arg2), arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
     };
+    imports.wbg.__wbg_jsDrawImageAlpha_56e35685b0308169 = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11) {
+        jsDrawImageAlpha(getObject(arg0), getStringFromWasm0(arg1, arg2), arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
+    };
     imports.wbg.__wbg_jsAlphaToMain_288b6ab8d12567c1 = function(arg0, arg1, arg2) {
         jsAlphaToMain(getObject(arg0), getObject(arg1), arg2);
     };
@@ -210,6 +213,18 @@ async function init(input) {
     imports.wbg.__wbg_fillRect_cececda617224b84 = function(arg0, arg1, arg2, arg3, arg4) {
         getObject(arg0).fillRect(arg1, arg2, arg3, arg4);
     };
+    imports.wbg.__wbg_restore_d8b8a7523e90d7da = function(arg0) {
+        getObject(arg0).restore();
+    };
+    imports.wbg.__wbg_save_adc15597ea9ca2d1 = function(arg0) {
+        getObject(arg0).save();
+    };
+    imports.wbg.__wbg_rotate_67312d380e6bfe41 = handleError(function(arg0, arg1) {
+        getObject(arg0).rotate(arg1);
+    });
+    imports.wbg.__wbg_translate_995449d37efa9be6 = handleError(function(arg0, arg1, arg2) {
+        getObject(arg0).translate(arg1, arg2);
+    });
     imports.wbg.__wbindgen_throw = function(arg0, arg1) {
         throw new Error(getStringFromWasm0(arg0, arg1));
     };

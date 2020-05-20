@@ -19,6 +19,7 @@ function loadAllImages() {
   assets["health_fill"] = loadImage("assets/health_fill.png");
   assets["cog_fill"] = loadImage("assets/cog_fill.png");
   assets["health_bar"] = loadImage("assets/health_bar.png");
+  assets["vision_wedge"] = loadImage("assets/enemy_vision_wedge.png");
 }
 
 export function jsDrawImage(ctx, imgName, sx, sy, sw, sh, x, y, w, h) {

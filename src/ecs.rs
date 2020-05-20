@@ -1,8 +1,14 @@
+use core::Direction;
 
 #[derive(Debug, Clone)]
 pub struct LogicalPos {
     pub x: i32,
     pub y: i32,
+}
+
+pub struct VisionWedge {
+    pub radius: i32,
+    pub dir: Direction,
 }
 
 #[derive(Debug)]
@@ -60,6 +66,7 @@ pub struct CombatInfo {
 pub struct Entity {
     pub name: &'static str,
     pub logical_pos: Option<LogicalPos>,
+    pub vision_wedge: Option<VisionWedge>,
     pub render_info: Option<RenderInfo>,
     pub action_queue: Option<ActionQueue>,
     pub entity_target: Option<EntityTarget>,
