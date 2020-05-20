@@ -154,6 +154,11 @@ impl GameState {
         let wx_int = wx as i32;
         let wy_int = wy as i32;
 
+        // now only accept clicks in areas that have been seen
+        if self.tile_grid.get_visibility(wx_int, wy_int) == &core::Visibility::UNSEEN {
+            return Some(());
+        }
+
         if x0 == wx_int && y0 == wy_int {
             // self click
             self.process_self_click();
