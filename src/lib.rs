@@ -126,7 +126,14 @@ impl GameState {
     }
 
     pub fn receive_key(&mut self, code: i32) {
-        console_log!("rust received code: {}", code);
+        match code {
+            constants::KEY_A => self.player_attack(),
+            constants::KEY_B => { console_log!("OPEN BAG"); Some(()) },
+            constants::KEY_G => { console_log!("GRAB"); Some(()) },
+            constants::KEY_T => { console_log!("TARGET"); Some(()) },
+            constants::KEY_W => self.player_wait(),
+            _ => Some(()),
+        };
     }
 
     // ------- internal functions ---------------------
@@ -166,6 +173,7 @@ impl GameState {
                         console_log!("rust lib: path len is 0, how???");
                     } else {
                         if clicked_enemy {
+                            // might be redundant!!! TODO
                             self.entity_map.get_mut(&0)?.action_queue.as_mut()?.queue =
                                 vec![ecs::Action::Move(path[0].0, path[0].1)];
                         } else {
@@ -183,11 +191,39 @@ impl GameState {
         Some(())
     }
 
-    fn process_self_click(&mut self) -> Option<()> {
+    fn process_self_click(&mut self) {
+        self.player_wait();
+    }
+
+    fn player_wait(&mut self) -> Option<()> {
         self.entity_map.get_mut(&0)?.action_queue.as_mut()
             .map(|aq| aq.queue.push(ecs::Action::Wait));
 
         Some(())
+    }
+
+    fn try_attack_tile(&mut self, x: i32, y: i32) -> Option<bool> {
+        match self.get_entity_at(x, y) {
+            Some(id) => {
+                self.entity_map.get_mut(&0)?.entity_target = Some(ecs::EntityTarget { id: id });
+                Some(true)
+            },
+            None => Some(false),
+        }
+    }
+
+    fn player_attack(&mut self) -> Option<()> {
+        let lp = self.entity_map.get(&0)?.logical_pos.as_ref()?;
+        let (x0, y0) = (lp.x, lp.y);
+
+        for (dx, dy) in &[(1, 0), (1, -1), (0, -1), (-1, -1), (-1, 0), (-1, 1), (0, 1), (1, 1)] {
+            match self.try_attack_tile(x0 + dx, y0 + dy)? {
+                true => return Some(()),
+                false => {},
+            }
+        }
+
+        None
     }
 
     fn update(&mut self, dt: f32) {
