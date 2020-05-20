@@ -164,13 +164,13 @@ async function init(input) {
         console.log(getStringFromWasm0(arg0, arg1));
     };
     imports.wbg.__wbg_jsDrawImage_d97f6f4af62177d1 = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) {
-        jsDrawImage(getObject(arg0), getStringFromWasm0(arg1, arg2), arg3 >>> 0, arg4 >>> 0, arg5 >>> 0, arg6 >>> 0, arg7 >>> 0, arg8 >>> 0, arg9 >>> 0, arg10 >>> 0);
+        jsDrawImage(getObject(arg0), getStringFromWasm0(arg1, arg2), arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
     };
     imports.wbg.__wbg_jsAlphaToMain_288b6ab8d12567c1 = function(arg0, arg1, arg2) {
         jsAlphaToMain(getObject(arg0), getObject(arg1), arg2);
     };
     imports.wbg.__wbg_jsDrawString_5b666f900490124e = function(arg0, arg1, arg2, arg3, arg4) {
-        jsDrawString(getObject(arg0), getStringFromWasm0(arg1, arg2), arg3 >>> 0, arg4 >>> 0);
+        jsDrawString(getObject(arg0), getStringFromWasm0(arg1, arg2), arg3, arg4);
     };
     imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
         takeObject(arg0);

@@ -30,15 +30,15 @@ mod bresenham;
 #[wasm_bindgen(raw_module = "../app.js")]
 extern "C" {
     fn jsDrawImage(ctx: &CanvasRenderingContext2d, imgName: &str,
-                   sx: u32, sy: u32, sw: u32, sh: u32,
-                   x: u32, y: u32, w: u32, h: u32);
+                   sx: i32, sy: i32, sw: i32, sh: i32,
+                   x: i32, y: i32, w: i32, h: i32);
     fn jsDrawImageAlpha(ctx: &CanvasRenderingContext2d, imgName: &str,
-                        sx: u32, sy: u32, sw: u32, sh: u32,
-                        x: u32, y: u32, w: u32, h: u32,
+                        sx: i32, sy: i32, sw: i32, sh: i32,
+                        x: i32, y: i32, w: i32, h: i32,
                         alpha: f32);
     fn jsAlphaToMain(ctx: &CanvasRenderingContext2d, ctx_alpha: &CanvasRenderingContext2d,
                      alpha: f32);
-    fn jsDrawString(ctx: &CanvasRenderingContext2d, text: &str, x: u32, y: u32);
+    fn jsDrawString(ctx: &CanvasRenderingContext2d, text: &str, x: i32, y: i32);
 }
 
 #[wasm_bindgen]
@@ -49,7 +49,7 @@ pub struct GameState {
     tile_grid: core::TileGrid,
     entity_map: HashMap<usize, ecs::Entity>,
     curr_turn: usize,
-    last_click_pos: (u32, u32),
+    last_click_pos: (i32, i32),
     last_camera_pos: (f32, f32),
     paused: bool,
     floating_texts: Vec<core::FloatingText>,
@@ -60,7 +60,7 @@ pub struct GameState {
 impl GameState {
     #[wasm_bindgen(constructor)]
     pub fn new(ctx: CanvasRenderingContext2d, ctx_aplha: CanvasRenderingContext2d,
-               width: u32, height: u32) -> Self {
+               width: i32, height: i32) -> Self {
         let mut camera = core::Camera::new(40, 40, width, height);
 
         let (px, py) = (5, 5);
@@ -99,15 +99,15 @@ impl GameState {
         self.render();
     }
 
-    pub fn receive_click(&mut self, mx: u32, my: u32, is_down: bool) {
+    pub fn receive_click(&mut self, mx: i32, my: i32, is_down: bool) {
         if is_down {
             self.last_click_pos = (mx, my);
             self.last_camera_pos = (self.camera.x, self.camera.y);
             self.paused = true;
         } else {
             let (mx0, my0) = self.last_click_pos;
-            let dx = (mx as i32 - mx0 as i32).abs();
-            let dy = (my as i32 - my0 as i32).abs();
+            let dx = (mx - mx0).abs();
+            let dy = (my - my0).abs();
             if dx + dy < 20 {
                 let (wx, wy) = util::pixel_to_world(mx, my, &self.camera);
                 self.process_click(wx, wy);
@@ -116,7 +116,7 @@ impl GameState {
         }
     }
 
-    pub fn receive_drag(&mut self, mx: u32, my: u32) {
+    pub fn receive_drag(&mut self, mx: i32, my: i32) {
         let (mx0, my0) = self.last_click_pos;
         let (cx0, cy0) = self.last_camera_pos;
         let dx: f32 = (mx0 as f32 - mx as f32) / self.camera.tile_pix as f32;
@@ -125,7 +125,7 @@ impl GameState {
         self.camera.y = cy0 + dy;
     }
 
-    pub fn receive_key(&mut self, code: u32) {
+    pub fn receive_key(&mut self, code: i32) {
         console_log!("rust received code: {}", code);
     }
 

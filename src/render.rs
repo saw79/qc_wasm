@@ -96,7 +96,7 @@ fn draw_entity(ctx: &CanvasRenderingContext2d, entity: &Entity, camera: &Camera,
     // health bar
     if draw_health {
         let ci = entity.combat_info.as_ref()?;
-        let hbw = (ci.health as f32 / ci.max_health as f32 * camera.tile_pix as f32) as u32;
+        let hbw = (ci.health as f32 / ci.max_health as f32 * camera.tile_pix as f32) as i32;
         jsDrawImage(ctx, "health_bar",
                     0, 0, 100, 20,
                     px+(camera.tile_pix-hbw)/2, py-camera.tile_pix/20, hbw, camera.tile_pix/10);

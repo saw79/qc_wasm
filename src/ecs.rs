@@ -8,10 +8,10 @@ pub struct LogicalPos {
 #[derive(Debug)]
 pub struct RenderFrame {
     pub sheet_name: &'static str,
-    pub sheet_x: u32,
-    pub sheet_y: u32,
-    pub sheet_w: u32,
-    pub sheet_h: u32,
+    pub sheet_x: i32,
+    pub sheet_y: i32,
+    pub sheet_w: i32,
+    pub sheet_h: i32,
 }
 
 #[derive(Debug)]

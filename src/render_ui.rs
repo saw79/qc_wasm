@@ -5,16 +5,16 @@ use crate::{
 
 pub fn draw_ui(state: &GameState) -> Option<()> {
     let ci = state.entity_map.get(&0)?.combat_info.as_ref()?;
-    draw_status_bar(state, ci.health.abs() as u32, ci.max_health.abs() as u32, true);
-    draw_status_bar(state, ci.cognition.abs() as u32, ci.max_cognition.abs() as u32, false);
+    draw_status_bar(state, ci.health, ci.max_health, true);
+    draw_status_bar(state, ci.cognition, ci.max_cognition, false);
     Some(())
 }
 
-fn draw_status_bar(state: &GameState, value: u32, max_value: u32, is_health: bool) {
+fn draw_status_bar(state: &GameState, value: i32, max_value: i32, is_health: bool) {
     // for now lets say canvas_width = 100 hp
     let tile_pix = state.camera.tile_pix;
-    let bar_width_max: u32 = (max_value as f32 / 100.0 * state.camera.canvas_width as f32) as u32;
-    let bar_width_cur: u32 = (value as f32 / 100.0 * state.camera.canvas_width as f32) as u32;
+    let bar_width_max: i32 = (max_value as f32 / 100.0 * state.camera.canvas_width as f32) as i32;
+    let bar_width_cur: i32 = (value as f32 / 100.0 * state.camera.canvas_width as f32) as i32;
 
     let x_pos = 10;
     let y_pos = 10 + if is_health { 0 } else { tile_pix/2 };
@@ -31,9 +31,9 @@ fn draw_status_bar(state: &GameState, value: u32, max_value: u32, is_health: boo
                    11, 0, 0, 74, 40, x_pos, y_pos, bar_width_max, tile_pix/2);
 }
 
-fn draw_as_3patch(state: &GameState, name: &str, edge: u32,
-                  sx: u32, sy: u32, sw: u32, sh: u32,
-                  x: u32, y: u32, w: u32, h: u32) {
+fn draw_as_3patch(state: &GameState, name: &str, edge: i32,
+                  sx: i32, sy: i32, sw: i32, sh: i32,
+                  x: i32, y: i32, w: i32, h: i32) {
     jsDrawImage(&state.ctx, name,
                 sx, sy, edge, sh,
                 x, y, edge, h);

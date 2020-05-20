@@ -3,7 +3,7 @@ use bresenham::get_line;
 
 use debug::log;
 
-const Y_TILES: u32 = 20;
+const Y_TILES: i32 = 20;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum TileType {
@@ -107,13 +107,13 @@ pub struct Camera {
     pub y: f32,
     pub width: f32,
     pub height: f32,
-    pub canvas_width: u32,
-    pub canvas_height: u32,
-    pub tile_pix: u32,
+    pub canvas_width: i32,
+    pub canvas_height: i32,
+    pub tile_pix: i32,
 }
 
 impl Camera {
-    pub fn new(grid_w: u32, grid_h: u32, canvas_w: u32, canvas_h: u32) -> Self {
+    pub fn new(grid_w: i32, grid_h: i32, canvas_w: i32, canvas_h: i32) -> Self {
         Camera {
             x: grid_w as f32 / 2.0,
             y: grid_h as f32 / 2.0,

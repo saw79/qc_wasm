@@ -79,7 +79,7 @@ pub fn get_walk_anim(name: &'static str, dir: &Direction) -> Vec<RenderFrame> {
 
     let num_frames = 4;
 
-    (0..num_frames).collect::<Vec<u32>>().iter().map(|c| RenderFrame {
+    (0..num_frames).collect::<Vec<i32>>().iter().map(|c| RenderFrame {
         sheet_name: name,
         sheet_x: c*32,
         sheet_y: row*32,
