@@ -36,12 +36,15 @@ extern "C" {
                         sx: u32, sy: u32, sw: u32, sh: u32,
                         x: u32, y: u32, w: u32, h: u32,
                         alpha: f32);
+    fn jsAlphaToMain(ctx: &CanvasRenderingContext2d, ctx_alpha: &CanvasRenderingContext2d,
+                     alpha: f32);
     fn jsDrawString(ctx: &CanvasRenderingContext2d, text: &str, x: u32, y: u32);
 }
 
 #[wasm_bindgen]
 pub struct GameState {
     ctx: CanvasRenderingContext2d,
+    ctx_alpha: CanvasRenderingContext2d,
     camera: core::Camera,
     tile_grid: core::TileGrid,
     entity_map: HashMap<usize, ecs::Entity>,
@@ -56,7 +59,8 @@ pub struct GameState {
 #[wasm_bindgen]
 impl GameState {
     #[wasm_bindgen(constructor)]
-    pub fn new(ctx: CanvasRenderingContext2d, width: u32, height: u32) -> Self {
+    pub fn new(ctx: CanvasRenderingContext2d, ctx_aplha: CanvasRenderingContext2d,
+               width: u32, height: u32) -> Self {
         let mut camera = core::Camera::new(40, 40, width, height);
 
         let (px, py) = (5, 5);
@@ -73,6 +77,7 @@ impl GameState {
 
         GameState {
             ctx: ctx,
+            ctx_alpha: ctx_aplha,
             camera: camera,
             tile_grid: tile_grid,
             entity_map: entity_map,

@@ -31,6 +31,12 @@ export function jsDrawImageAlpha(ctx, imgName, sx, sy, sw, sh, x, y, w, h, alpha
   ctx.globalAlpha = 1;
 }
 
+export function jsAlphaToMain(ctx, ctx_alpha, alpha) {
+  ctx.globalAlpha = alpha;
+  ctx.drawImage(ctx_alpha.canvas, 0, 0);
+  ctx.globalAlpha = 1;
+}
+
 export function jsDrawString(ctx, s, x, y) {
     ctx.font = "32px Impact";
     ctx.fillStyle = "red";
@@ -56,15 +62,21 @@ async function run() {
   //canvas.webkitRequestFullScreen();
 
   // double buffering
-  const canvas2 = document.createElement("canvas");
-  canvas2.width = width;
-  canvas2.height = height;
-  const ctx2 = canvas2.getContext("2d");
+  const canvas_off = document.createElement("canvas");
+  canvas_off.width = width;
+  canvas_off.height = height;
+  const ctx_off = canvas_off.getContext("2d");
+
+  // non-1 alplha buffer (fixes overlapping tile bug)
+  const canvas_alpha = document.createElement("canvas");
+  canvas_alpha.width = width;
+  canvas_alpha.height = height;
+  const ctx_alpha = canvas_alpha.getContext("2d");
 
   // load all assets
   loadAllImages();
 
-  var state = new GameState(ctx2, width, height);
+  var state = new GameState(ctx_off, ctx_alpha, width, height);
   var mouseDown = false;
 
   function handleClick(cx, cy, is_down) {
@@ -120,7 +132,7 @@ async function run() {
 
   function mainLoop(timestamp) {
     state.tick(timestamp - prevTime);
-    ctx.drawImage(canvas2, 0, 0);
+    ctx.drawImage(canvas_off, 0, 0);
 
     prevTime = timestamp;
     requestAnimationFrame(mainLoop);

@@ -4,6 +4,7 @@ use crate::{
     GameState,
     jsDrawImage,
     jsDrawImageAlpha,
+    jsAlphaToMain,
     jsDrawString,
 };
 
@@ -16,13 +17,20 @@ use debug::log;
 pub fn draw_all(state: &GameState) {
     clear(state);
     draw_tiles(state);
+    jsAlphaToMain(&state.ctx, &state.ctx_alpha, 0.5);
     draw_entities(state);
     draw_floating_text(state);
 }
 
 fn clear(state: &GameState) {
     state.ctx.set_fill_style(&"black".into());
-    state.ctx.fill_rect(0., 0., state.camera.canvas_width as f64, state.camera.canvas_height as f64);
+    state.ctx.fill_rect(
+        0.0, 0.0, state.camera.canvas_width as f64, state.camera.canvas_height as f64);
+
+    // clear special alpha context
+    state.ctx_alpha.set_fill_style(&"rgba(0, 0, 0, 0)".into());
+    state.ctx_alpha.clear_rect(
+        0.0, 0.0, state.camera.canvas_width as f64, state.camera.canvas_height as f64);
 }
 
 fn draw_tiles(state: &GameState) {
@@ -63,12 +71,11 @@ fn draw_tile(state: &GameState, ix: i32, iy: i32, tile_type: &TileType, vis: &Vi
     if vis == &Visibility::VISIBLE {
         jsDrawImage(&state.ctx, "prison_tiles",
                     sx, sy, 32, 32,
-                    px, py, state.camera.tile_pix, state.camera.tile_pix);
+                    px-1, py-1, state.camera.tile_pix+2, state.camera.tile_pix+2);
     } else {
-        jsDrawImageAlpha(&state.ctx, "prison_tiles",
-                         sx, sy, 32, 32,
-                         px, py, state.camera.tile_pix, state.camera.tile_pix,
-                         0.5);
+        jsDrawImage(&state.ctx_alpha, "prison_tiles",
+                    sx, sy, 32, 32,
+                    px-1, py-1, state.camera.tile_pix+2, state.camera.tile_pix+2);
     }
 }
 
