@@ -55,7 +55,7 @@ fn draw_tiles(state: &GameState) {
 
 fn draw_entities(state: &GameState) {
     for (id, entity) in &state.entity_map {
-        draw_entity(&state.ctx, entity, &state.camera, *id > 0);
+        draw_entity(&state.ctx, entity, &state.camera, &state.tile_grid, *id > 0);
     }
 }
 
@@ -80,9 +80,14 @@ fn draw_tile(state: &GameState, ix: i32, iy: i32, tile_type: &TileType, vis: &Vi
 }
 
 //fn draw_entity(state: &GameState, ri: &RenderInfo) {
-fn draw_entity(ctx: &CanvasRenderingContext2d, entity: &Entity, camera: &Camera, draw_health: bool)
+fn draw_entity(ctx: &CanvasRenderingContext2d, entity: &Entity,
+               camera: &Camera, tile_grid: &TileGrid, draw_health: bool)
     -> Option<()> {
     let ri = entity.render_info.as_ref()?;
+
+    if tile_grid.get_visibility(ri.x as i32, ri.y as i32) != &Visibility::VISIBLE {
+        return Some(());
+    }
 
     let (px, py) = world_to_pixel(ri.x, ri.y, camera);
 
