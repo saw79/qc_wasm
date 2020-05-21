@@ -1,6 +1,6 @@
 use pathfinding::prelude::{absdiff, astar};
 
-use core::{TileType, TileGrid};
+use tile_grid::{TileType, TileGrid};
 
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Pos(pub i32, pub i32);
@@ -21,10 +21,14 @@ impl Pos {
 
                 let nx = x + dx;
                 let ny = y + dy;
-                if nx >= 0 && nx < tile_grid.width as i32 &&
-                   ny >= 0 && ny < tile_grid.height as i32 &&
-                   *tile_grid.at(nx, ny) != TileType::WALL {
-                    nbs.push(Pos(nx, ny));
+                if nx >= 0 && nx < tile_grid.width as i32 && ny >= 0 && ny < tile_grid.height as i32 {
+                    match tile_grid.at(nx, ny) {
+                        &TileType::EMPTY      => {},
+                        &TileType::FLOOR      => nbs.push(Pos(nx, ny)),
+                        &TileType::WALL       => {},
+                        &TileType::DOORCLOSED => nbs.push(Pos(nx, ny)),
+                        &TileType::DOOROPEN   => nbs.push(Pos(nx, ny)),
+                    };
                 }
             }
         }

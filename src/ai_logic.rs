@@ -1,4 +1,4 @@
-use core::{TileType, TileGrid};
+use tile_grid::{TileType, TileGrid};
 use ecs::{Entity, Action, AlertState};
 use path_logic::get_path;
 
@@ -7,14 +7,12 @@ use rand::prelude::*;
 /*
  * Basic enemy logic:
  * 1. KILL:
- *      see player? yes -> move/attack
- *                   no -> GOTO search state
+ *      move/attack
  * 2. SEARCH:
  *      a. go to last known location
- *      b. spin around
- *      c. GOTO patrol state
- *
- * 3. PATROL: move randomly
+ *      b. spin around?
+ * 3. PATROL:
+ *      move randomly
  */
 
 pub fn compute_action(entity: &Entity, tile_grid: &TileGrid, player: &Entity) -> Option<Action> {
@@ -57,7 +55,9 @@ pub fn compute_action_patrol(entity: &Entity, tile_grid: &TileGrid) -> Option<Ac
     let valid_moves = [(-1, -1), (0, -1), (1, -1), (-1, 0), (0, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
         .iter()
         .map(|(dx, dy)| (lp.x + dx, lp.y + dy))
-        .filter(|(x, y)| tile_grid.at(*x, *y) != &TileType::WALL)
+        .filter(|(x, y)|
+                tile_grid.at(*x, *y) != &TileType::WALL &&
+                tile_grid.at(*x, *y) != &TileType::EMPTY)
         .collect::<Vec<(i32, i32)>>();
 
     let idx = (random::<u32>() % valid_moves.len() as u32) as usize;

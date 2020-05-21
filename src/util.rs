@@ -1,6 +1,11 @@
 use std::collections::HashMap;
+use rand::prelude::*;
 
 use core::Camera;
+
+pub fn rand_usize(x0: usize, x1: usize) -> usize {
+    random::<usize>() % (x1 - x0) + x0
+}
 
 pub fn world_to_pixel(w_x: f32, w_y: f32, camera: &Camera) -> (i32, i32) {
     //let p_x = (w_x - camera.x) as i32 * camera.tile_pix as i32 + (camera.canvas_width/2) as i32;

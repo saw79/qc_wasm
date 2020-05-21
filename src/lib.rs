@@ -14,6 +14,7 @@ use debug::log;
 
 mod constants;
 mod core;
+mod tile_grid;
 mod ecs;
 mod util;
 mod factory;
@@ -26,6 +27,7 @@ mod animation_logic;
 mod ai_logic;
 mod combat_logic;
 mod bresenham;
+mod level_gen;
 
 #[wasm_bindgen(raw_module = "../app.js")]
 extern "C" {
@@ -46,7 +48,7 @@ pub struct GameState {
     ctx: CanvasRenderingContext2d,
     ctx_alpha: CanvasRenderingContext2d,
     camera: core::Camera,
-    tile_grid: core::TileGrid,
+    tile_grid: tile_grid::TileGrid,
     entity_map: HashMap<usize, ecs::Entity>,
     curr_turn: usize,
     last_click_pos: (i32, i32),
@@ -63,17 +65,25 @@ impl GameState {
                width: i32, height: i32) -> Self {
         let mut camera = core::Camera::new(40, 40, width, height);
 
-        let (px, py) = (5, 5);
+        let mut tile_grid = tile_grid::TileGrid::new(40, 40);
+
+        let (px, py) = tile_grid.get_random_floor();
 
         camera.x = px as f32;
         camera.y = py as f32;
+        
+        // zoom out test
+        /*let zoom: f32 = 3.0;
+        camera.width *= zoom;
+        camera.height *= zoom;
+        camera.tile_pix = (camera.tile_pix as f32 / zoom) as i32;*/
 
-        let mut tile_grid = core::TileGrid::new(40, 40);
         tile_grid.update_visibility(px, py);
 
         let mut entity_map = HashMap::new();
         entity_map.insert(0, factory::create_player(px, py));
-        entity_map.insert(1, factory::create_enemy(10, 10, "prison_guard"));
+        let (ex, ey) = tile_grid.get_random_floor();
+        entity_map.insert(1, factory::create_enemy(ex, ey, "prison_guard"));
 
         GameState {
             ctx: ctx,
@@ -155,7 +165,7 @@ impl GameState {
         let wy_int = wy as i32;
 
         // now only accept clicks in areas that have been seen
-        if self.tile_grid.get_visibility(wx_int, wy_int) == &core::Visibility::UNSEEN {
+        if self.tile_grid.get_visibility(wx_int, wy_int) == &tile_grid::Visibility::UNSEEN {
             return Some(());
         }
 

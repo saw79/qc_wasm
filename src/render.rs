@@ -10,9 +10,10 @@ use crate::{
     jsDrawString,
 };
 
-use core::*;
-use util::*;
-use ecs::*;
+use core::{Direction, Camera};
+use tile_grid::{TileType, Visibility, TileGrid};
+use util::world_to_pixel;
+use ecs::{Entity, AlertState};
 
 use debug::log;
 
@@ -64,6 +65,7 @@ fn draw_entities(state: &GameState) {
 fn draw_tile(state: &GameState, ix: i32, iy: i32, tile_type: &TileType, vis: &Visibility) {
     let (px, py) = world_to_pixel(ix as f32, iy as f32, &state.camera);
     let (sx, sy) = match tile_type {
+        TileType::EMPTY => return,
         TileType::FLOOR => (0, 0),
         TileType::WALL => (0, 32),
         TileType::DOORCLOSED => (32, 0),

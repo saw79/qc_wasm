@@ -1,5 +1,6 @@
 use crate::GameState;
-use core::{Direction, TileGrid};
+use core::Direction;
+use tile_grid::TileGrid;
 use util::get_next_id;
 use ecs::{Entity, LogicalPos, Action, AlertState};
 use factory::{get_walk_anim};
