@@ -14,6 +14,8 @@ use core::*;
 use util::*;
 use ecs::*;
 
+use debug::log;
+
 pub fn draw_all(state: &GameState) {
     clear(state);
     draw_tiles(state);
@@ -91,36 +93,38 @@ fn draw_entity(ctx: &CanvasRenderingContext2d, entity: &Entity,
 
     let (px, py) = world_to_pixel(ri.x, ri.y, camera);
 
-    // vision wedge
-    if let Some(vw) = entity.vision_wedge.as_ref() {
-        let vw_size: i32 = (2*vw.radius + 1) * camera.tile_pix;
+    // vision
+    if let Some(vi) = entity.vision_info.as_ref() {
+        let vi_size: i32 = (2*vi.radius + 1) * camera.tile_pix;
 
-        /*
-        let vw_x = px - vw_size/2 + camera.tile_pix/2;
-        let vw_y = py - vw_size/2 + camera.tile_pix/2;
-        jsDrawImageAlpha(ctx, "vision_wedge",
-                         0, 0, 256, 256,
-                         vw_x, vw_y, vw_size, vw_size,
-                         0.05);
-        */
+        if vi.is_wedge {
+            let angle = match vi.dir {
+                Direction::Right => 0.0,
+                Direction::Down => f64::consts::PI/2.0,
+                Direction::Left => f64::consts::PI*2.0/2.0,
+                Direction::Up => f64::consts::PI*3.0/2.0,
+            };
 
-        let angle = match vw.dir {
-            Direction::Right => 0.0,
-            Direction::Down => f64::consts::PI/2.0,
-            Direction::Left => f64::consts::PI*2.0/2.0,
-            Direction::Up => f64::consts::PI*3.0/2.0,
-        };
+            ctx.save();
+            let (center_x, center_y) = (px + camera.tile_pix/2, py + camera.tile_pix/2);
+            if let Err(_) = ctx.translate(center_x as f64, center_y as f64) {
+                ctx.restore();
+                return None;
+            }
+            if let Err(_) = ctx.rotate(angle) {
+                ctx.restore();
+                return None;
+            }
 
-        ctx.save();
-        ctx.translate((px + camera.tile_pix/2) as f64, (py + camera.tile_pix/2) as f64);
-        ctx.rotate(angle);
+            jsDrawImageAlpha(ctx, "vision_wedge",
+                             0, 0, 256, 256,
+                             -vi_size/2, -vi_size/2, vi_size, vi_size,
+                             0.05);
 
-        jsDrawImageAlpha(ctx, "vision_wedge",
-                         0, 0, 256, 256,
-                         -vw_size/2, -vw_size/2, vw_size, vw_size,
-                         0.05);
-
-        ctx.restore();
+            ctx.restore();
+        } else {
+            console_log!("Vision Info rendering for !is_wedge not yet implemented!!!");
+        }
     }
 
     // entity
@@ -140,13 +144,27 @@ fn draw_entity(ctx: &CanvasRenderingContext2d, entity: &Entity,
                     px+(camera.tile_pix-hbw)/2, py-camera.tile_pix/20, hbw, camera.tile_pix/10);
     }
 
+    // alertness state
+    if is_enemy {
+        if let Some(vi) = entity.vision_info.as_ref() {
+            match vi.alert_state {
+                AlertState::PATROL => jsDrawString(ctx, "patrol", "...",
+                                                   px + camera.tile_pix/2, py - camera.tile_pix/10),
+                AlertState::SEARCH => jsDrawString(ctx, "search", "?",
+                                                   px + camera.tile_pix/2, py - camera.tile_pix/10),
+                AlertState::KILL   => jsDrawString(ctx, "kill", "!",
+                                                   px + camera.tile_pix/2, py - camera.tile_pix/10),
+            };
+        }
+    }
+
     Some(())
 }
 
 fn draw_floating_text(state: &GameState) {
     for ft in &state.floating_texts {
         let (px, py) = world_to_pixel(ft.x, ft.y, &state.camera);
-        jsDrawString(&state.ctx, &ft.text, px, py);
+        jsDrawString(&state.ctx, "floating", &ft.text, px, py);
     }
 }
 

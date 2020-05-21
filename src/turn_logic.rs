@@ -1,10 +1,12 @@
 use crate::GameState;
 use core::{Direction, TileGrid};
 use util::get_next_id;
-use ecs::{Entity, LogicalPos, Action};
+use ecs::{Entity, LogicalPos, Action, AlertState};
 use factory::{get_walk_anim};
 use path_logic;
 use ai_logic;
+
+use debug::log;
 
 pub fn compute_turns(state: &mut GameState) -> Option<()> {
     if let None = state.entity_map.get(&state.curr_turn) {
@@ -16,9 +18,18 @@ pub fn compute_turns(state: &mut GameState) -> Option<()> {
             // last turn still active, wait for it to be removed
             return Some(());
         } else {
-            // compute a turn!
-            // Some -> computed new turn successfully
-            // None -> blocking, waiting for input, etc...
+            // compute NEW turn
+            // update alertness
+            if state.curr_turn > 0 {
+                let (pl_x, pl_y) = {
+                    let lp = state.entity_map.get(&0)?.logical_pos.as_ref()?;
+                    (lp.x, lp.y)
+                };
+                update_alertness(
+                    state.entity_map.get_mut(&state.curr_turn)?,
+                    &state.tile_grid,
+                    pl_x, pl_y);
+            }
             match compute_turn(state) {
                 Some(action) => {
                     perform_action_logic(
@@ -26,6 +37,19 @@ pub fn compute_turns(state: &mut GameState) -> Option<()> {
                         action,
                         &mut state.tile_grid,
                         state.curr_turn == 0);
+
+                    // update alertness again
+                    if state.curr_turn > 0 {
+                        let (pl_x, pl_y) = {
+                            let lp = state.entity_map.get(&0)?.logical_pos.as_ref()?;
+                            (lp.x, lp.y)
+                        };
+                        update_alertness(
+                            state.entity_map.get_mut(&state.curr_turn)?,
+                            &state.tile_grid,
+                            pl_x, pl_y);
+                    }
+
                     increment_turn(state);
                 },
                 None => {},
@@ -66,7 +90,10 @@ fn compute_turn(state: &mut GameState) -> Option<Action> {
             x
         }
     } else if id > 0 {
-        ai_logic::compute_action(state.entity_map.get(&id)?, &state.tile_grid)
+        ai_logic::compute_action(
+            state.entity_map.get(&id)?,
+            &state.tile_grid,
+            state.entity_map.get(&0)?)
     } else {
         None
     }
@@ -123,9 +150,9 @@ fn perform_action_logic(entity: &mut Entity, action: Action, tile_grid: &mut Til
             // set logical position to desired move pos
             entity.logical_pos = Some(LogicalPos { x: move_x, y: move_y });
             // set enemy vision wedge direction
-            if let Some(vw) = entity.vision_wedge.as_mut() {
+            if let Some(vi) = entity.vision_info.as_mut() {
                 match dir_opt {
-                    Some(dir) => vw.dir = dir,
+                    Some(dir) => vi.dir = dir,
                     None => {},
                 };
             }
@@ -139,7 +166,32 @@ fn perform_action_logic(entity: &mut Entity, action: Action, tile_grid: &mut Til
         Action::Attack(id) => {
             entity.combat_info.as_mut()?.current_attack = Some(id);
         },
+        Action::Look(dir) => {
+            entity.vision_info.as_mut()?.dir = dir;
+        },
     };
+
+    Some(())
+}
+
+fn update_alertness(entity: &mut Entity, tile_grid: &TileGrid, pl_x: i32, pl_y: i32) -> Option<()> {
+    let lp = entity.logical_pos.as_ref()?;
+    let vi = entity.vision_info.as_mut()?;
+    if tile_grid.visibility_from_to(lp.x, lp.y, pl_x, pl_y, &vi.dir) {
+        vi.last_location = (pl_x, pl_y);
+        vi.alert_state = AlertState::KILL;
+    } else {
+        match vi.alert_state {
+            AlertState::KILL => vi.alert_state = AlertState::SEARCH,
+            AlertState::SEARCH => vi.alert_state =
+                if (lp.x, lp.y) == vi.last_location {
+                    AlertState::PATROL
+                } else {
+                    AlertState::SEARCH
+                },
+            AlertState::PATROL => vi.alert_state = AlertState::PATROL,
+        };
+    }
 
     Some(())
 }

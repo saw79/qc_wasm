@@ -6,7 +6,7 @@ pub fn create_player(x: i32, y: i32) -> Entity {
     Entity {
         name: "player_none",
         logical_pos: Some(LogicalPos { x: x, y: y }),
-        vision_wedge: None,
+        vision_info: None,
         render_info: Some(RenderInfo {
             x: x as f32,
             y: y as f32,
@@ -40,7 +40,13 @@ pub fn create_enemy(x: i32, y: i32, name: &'static str) -> Entity {
     Entity {
         name: name,
         logical_pos: Some(LogicalPos { x: x, y: y }),
-        vision_wedge: Some(VisionWedge { radius: ENEMY_VISION, dir: dir.clone() }),
+        vision_info: Some(VisionInfo {
+            is_wedge: true,
+            radius: ENEMY_VISION,
+            dir: dir.clone(),
+            alert_state: AlertState::PATROL,
+            last_location: (x, y),
+        }),
         render_info: Some(RenderInfo {
             x: x as f32,
             y: y as f32,

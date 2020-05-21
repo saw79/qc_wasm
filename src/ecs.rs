@@ -6,9 +6,19 @@ pub struct LogicalPos {
     pub y: i32,
 }
 
-pub struct VisionWedge {
+#[derive(Debug)]
+pub enum AlertState {
+    PATROL,
+    SEARCH,
+    KILL,
+}
+
+pub struct VisionInfo {
+    pub is_wedge: bool,
     pub radius: i32,
     pub dir: Direction,
+    pub alert_state: AlertState,
+    pub last_location: (i32, i32),
 }
 
 #[derive(Debug)]
@@ -36,6 +46,7 @@ pub enum Action {
     Wait,
     Move(i32, i32),
     Attack(usize),
+    Look(Direction),
 }
 
 #[derive(Debug)]
@@ -66,7 +77,7 @@ pub struct CombatInfo {
 pub struct Entity {
     pub name: &'static str,
     pub logical_pos: Option<LogicalPos>,
-    pub vision_wedge: Option<VisionWedge>,
+    pub vision_info: Option<VisionInfo>,
     pub render_info: Option<RenderInfo>,
     pub action_queue: Option<ActionQueue>,
     pub entity_target: Option<EntityTarget>,

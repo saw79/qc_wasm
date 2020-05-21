@@ -38,11 +38,33 @@ export function jsAlphaToMain(ctx, ctx_alpha, alpha) {
   ctx.globalAlpha = 1;
 }
 
-export function jsDrawString(ctx, s, x, y) {
+export function jsDrawString(ctx, style, text, x, y) {
+  if (style == "floating") {
     ctx.font = "32px Impact";
     ctx.fillStyle = "red";
     ctx.textAlign = "center";
-    ctx.fillText(s, x, y);
+  }
+  else if (style == "patrol") {
+    ctx.font = "32px Impact";
+    ctx.fillStyle = "blue";
+    ctx.textAlign = "center";
+  }
+  else if (style == "search") {
+    ctx.font = "32px Impact";
+    ctx.fillStyle = "yellow";
+    ctx.textAlign = "center";
+  }
+  else if (style == "kill") {
+    ctx.font = "32px Impact";
+    ctx.fillStyle = "red";
+    ctx.textAlign = "center";
+  }
+  else {
+    console.log("jsDrawString (js) error unknown style!! " + style);
+    return;
+  }
+
+  ctx.fillText(text, x, y);
 }
 
 async function run() {

@@ -38,7 +38,7 @@ extern "C" {
                         alpha: f32);
     fn jsAlphaToMain(ctx: &CanvasRenderingContext2d, ctx_alpha: &CanvasRenderingContext2d,
                      alpha: f32);
-    fn jsDrawString(ctx: &CanvasRenderingContext2d, text: &str, x: i32, y: i32);
+    fn jsDrawString(ctx: &CanvasRenderingContext2d, style: &str, text: &str, x: i32, y: i32);
 }
 
 #[wasm_bindgen]

@@ -156,6 +156,9 @@ async function init(input) {
     }
     const imports = {};
     imports.wbg = {};
+    imports.wbg.__wbg_jsDrawImage_d97f6f4af62177d1 = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) {
+        jsDrawImage(getObject(arg0), getStringFromWasm0(arg1, arg2), arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
+    };
     imports.wbg.__wbindgen_string_new = function(arg0, arg1) {
         var ret = getStringFromWasm0(arg0, arg1);
         return addHeapObject(ret);
@@ -163,17 +166,14 @@ async function init(input) {
     imports.wbg.__wbg_log_a08e1d56c9bc87ac = function(arg0, arg1) {
         console.log(getStringFromWasm0(arg0, arg1));
     };
-    imports.wbg.__wbg_jsDrawImage_d97f6f4af62177d1 = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10) {
-        jsDrawImage(getObject(arg0), getStringFromWasm0(arg1, arg2), arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10);
-    };
     imports.wbg.__wbg_jsDrawImageAlpha_56e35685b0308169 = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11) {
         jsDrawImageAlpha(getObject(arg0), getStringFromWasm0(arg1, arg2), arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11);
     };
     imports.wbg.__wbg_jsAlphaToMain_288b6ab8d12567c1 = function(arg0, arg1, arg2) {
         jsAlphaToMain(getObject(arg0), getObject(arg1), arg2);
     };
-    imports.wbg.__wbg_jsDrawString_5b666f900490124e = function(arg0, arg1, arg2, arg3, arg4) {
-        jsDrawString(getObject(arg0), getStringFromWasm0(arg1, arg2), arg3, arg4);
+    imports.wbg.__wbg_jsDrawString_5b666f900490124e = function(arg0, arg1, arg2, arg3, arg4, arg5, arg6) {
+        jsDrawString(getObject(arg0), getStringFromWasm0(arg1, arg2), getStringFromWasm0(arg3, arg4), arg5, arg6);
     };
     imports.wbg.__wbindgen_object_drop_ref = function(arg0) {
         takeObject(arg0);

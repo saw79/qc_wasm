@@ -1,5 +1,9 @@
-use constants::PLAYER_VISION;
+use std::f32;
+
+use constants::{PLAYER_VISION, ENEMY_VISION};
 use bresenham::get_line;
+
+use debug::log;
 
 const Y_TILES: i32 = 20;
 
@@ -105,6 +109,35 @@ impl TileGrid {
                 }
             }
         }
+    }
+
+    pub fn visibility_from_to(&self, x0: i32, y0: i32, x1: i32, y1: i32, dir: &Direction) -> bool {
+        // 1. check direction and radius
+        let dist = (((x1 - x0).pow(2) + (y1 - y0).pow(2)) as f32).sqrt();
+        if dist > ENEMY_VISION as f32 {
+            return false;
+        }
+
+        let pl_angle = ((y1 - y0) as f32).atan2((x1 - x0) as f32);
+        let look_angle = match dir {
+            &Direction::Right => 0.0,
+            &Direction::Down => f32::consts::PI/2.0,
+            &Direction::Left => f32::consts::PI*2.0/2.0,
+            &Direction::Up => f32::consts::PI*3.0/2.0,
+        };
+        if 1.0 - (pl_angle-look_angle).cos() > 0.708 { // cos(pi/4)
+            return false;
+        }
+
+        // 2. check tilegrid obstruction
+        let line = get_line(x0, y0, x1, y1);
+        for (xi, yi) in line {
+            if self.at(xi, yi) == &TileType::WALL || self.at(xi, yi) == &TileType::DOORCLOSED {
+                return false;
+            }
+        }
+        
+        true
     }
 }
 
