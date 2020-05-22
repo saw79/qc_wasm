@@ -184,7 +184,7 @@ fn perform_action_logic(entity: &mut Entity, action: Action, tile_grid: &mut Til
 fn update_alertness(entity: &mut Entity, tile_grid: &TileGrid, pl_x: i32, pl_y: i32) -> Option<()> {
     let lp = entity.logical_pos.as_ref()?;
     let vi = entity.vision_info.as_mut()?;
-    if tile_grid.visibility_from_to(lp.x, lp.y, pl_x, pl_y, &vi.dir) {
+    if tile_grid.visibility_from_to(lp.x, lp.y, pl_x, pl_y, vi.radius, Some(&vi.dir)) {
         vi.last_location = (pl_x, pl_y);
         vi.alert_state = AlertState::KILL;
     } else {
