@@ -35,8 +35,16 @@ impl UserInterface {
     pub fn new(width: i32, height: i32, tile_pix: i32) -> Self {
         let mut buttons = HashMap::new();
 
-        let btn_size = 2*tile_pix;
-        let btn_pad = tile_pix/2;
+        let mut btn_size = 2*tile_pix;
+        let mut btn_pad = tile_pix/2;
+
+        let button_bar_width = 5*(btn_size + btn_pad) + btn_pad;
+        if button_bar_width > width {
+            let ratio = (width as f32) / (button_bar_width as f32);
+            btn_size = (btn_size as f32 * ratio) as i32;
+            btn_pad = (btn_pad as f32 * ratio) as i32;
+        }
+
         let ypos = height - btn_size - btn_pad;
 
         buttons.insert(ButtonType::WAIT, ButtonInfo {
@@ -85,20 +93,6 @@ impl UserInterface {
             button_down: None,
         }
     }
-
-    /*pub fn add_button(&mut self, x: i32, y: i32, width: i32, height: i32,
-                      btn_type: ButtonType, base_img: String, skin_img: Option<String>) {
-        self.buttons.push(ButtonInfo {
-            x: x,
-            y: y,
-            width: width,
-            height: height,
-            btn_type: btn_type,
-            state: ButtonState::Up,
-            base_img: base_img,
-            skin_img: skin_img,
-        });
-    }*/
 
     pub fn log_click_down(&mut self, x: i32, y: i32) -> Option<ButtonType> {
         for (bt, bi) in self.buttons.iter_mut() {
