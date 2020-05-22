@@ -57,6 +57,7 @@ pub struct GameState {
     last_camera_pos: (f32, f32),
     paused: bool,
     floating_texts: Vec<core::FloatingText>,
+    enemy_visible_prev: bool,
 }
 
 
@@ -105,6 +106,7 @@ impl GameState {
             last_camera_pos: (0.0, 0.0),
             paused: false,
             floating_texts: vec![],
+            enemy_visible_prev: false,
         }
     }
 
@@ -185,6 +187,29 @@ impl GameState {
     }
 
     // ------- internal functions ---------------------
+
+    fn update(&mut self, dt: f32) {
+        turn_logic::compute_turns(self);
+        combat_logic::process_combat(self);
+        movement::move_entities(self, dt);
+        movement::move_floating_texts(self, dt);
+        animation_logic::compute_animations(self, dt);
+
+        let enemy_visible = self.is_enemy_visible();
+        if enemy_visible && !self.enemy_visible_prev {
+            if let Some(pl) = self.entity_map.get_mut(&0) {
+                if let Some(aq) = pl.action_queue.as_mut() {
+                    aq.queue.clear();
+                }
+            }
+        }
+        self.enemy_visible_prev = enemy_visible;
+    }
+
+    fn render(&mut self) {
+        render::draw_all(self);
+        render_ui::draw_ui(self);
+    }
 
     fn process_click(&mut self, wx: f32, wy: f32) -> Option<()> {
         // if has actions, this click means ABORT
@@ -275,19 +300,6 @@ impl GameState {
         None
     }
 
-    fn update(&mut self, dt: f32) {
-        turn_logic::compute_turns(self);
-        combat_logic::process_combat(self);
-        movement::move_entities(self, dt);
-        movement::move_floating_texts(self, dt);
-        animation_logic::compute_animations(self, dt);
-    }
-
-    fn render(&mut self) {
-        render::draw_all(self);
-        render_ui::draw_ui(self);
-    }
-
     fn get_entity_at(&self, x: i32, y: i32) -> Option<usize> {
         for (&id, entity) in &self.entity_map {
             if id == 0 { continue; }
@@ -300,6 +312,20 @@ impl GameState {
         }
 
         None
+    }
+
+    fn is_enemy_visible(&self) -> bool {
+        for (id, entity) in self.entity_map.iter() {
+            if *id > 0 {
+                if let Some(lp) = entity.logical_pos.as_ref() {
+                    if self.tile_grid.get_visibility(lp.x, lp.y) == &tile_grid::Visibility::VISIBLE {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 }
 
