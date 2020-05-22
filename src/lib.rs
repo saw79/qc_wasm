@@ -124,7 +124,7 @@ impl GameState {
         // USER INTERFACE
         if is_down {
             match self.ui.log_click_down(mx, my) {
-                Some(bt) => {
+                Some(_bt) => {
                     return;
                 },
                 None => {},
@@ -196,13 +196,14 @@ impl GameState {
         animation_logic::compute_animations(self, dt);
 
         let enemy_visible = self.is_enemy_visible();
-        if enemy_visible && !self.enemy_visible_prev {
+        if (enemy_visible && !self.enemy_visible_prev) || self.is_player_visible() {
             if let Some(pl) = self.entity_map.get_mut(&0) {
                 if let Some(aq) = pl.action_queue.as_mut() {
                     aq.queue.clear();
                 }
             }
         }
+
         self.enemy_visible_prev = enemy_visible;
     }
 
@@ -319,6 +320,20 @@ impl GameState {
             if *id > 0 {
                 if let Some(lp) = entity.logical_pos.as_ref() {
                     if self.tile_grid.get_visibility(lp.x, lp.y) == &tile_grid::Visibility::VISIBLE {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    fn is_player_visible(&self) -> bool {
+        for (id, entity) in self.entity_map.iter() {
+            if *id > 0 {
+                if let Some(vi) = entity.vision_info.as_ref() {
+                    if vi.alert_state == ecs::AlertState::KILL {
                         return true;
                     }
                 }

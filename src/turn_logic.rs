@@ -20,12 +20,12 @@ pub fn compute_turns(state: &mut GameState) -> Option<()> {
             return Some(());
         } else {
             // compute NEW turn
+            let (pl_x, pl_y) = {
+                let lp = state.entity_map.get(&0)?.logical_pos.as_ref()?;
+                (lp.x, lp.y)
+            };
             // update alertness
             if state.curr_turn > 0 {
-                let (pl_x, pl_y) = {
-                    let lp = state.entity_map.get(&0)?.logical_pos.as_ref()?;
-                    (lp.x, lp.y)
-                };
                 update_alertness(
                     state.entity_map.get_mut(&state.curr_turn)?,
                     &state.tile_grid,
@@ -37,14 +37,11 @@ pub fn compute_turns(state: &mut GameState) -> Option<()> {
                         state.entity_map.get_mut(&state.curr_turn)?,
                         action,
                         &mut state.tile_grid,
-                        state.curr_turn == 0);
+                        state.curr_turn == 0,
+                        pl_x, pl_y);
 
                     // update alertness again
                     if state.curr_turn > 0 {
-                        let (pl_x, pl_y) = {
-                            let lp = state.entity_map.get(&0)?.logical_pos.as_ref()?;
-                            (lp.x, lp.y)
-                        };
                         update_alertness(
                             state.entity_map.get_mut(&state.curr_turn)?,
                             &state.tile_grid,
@@ -124,29 +121,30 @@ fn try_target_path(entity: &Entity, tgt: &Entity, tile_grid: &TileGrid) -> Optio
     }
 }
 
-fn perform_action_logic(entity: &mut Entity, action: Action, tile_grid: &mut TileGrid, is_player: bool) -> Option<()> {
+fn get_direction(x0: i32, y0: i32, x1: i32, y1: i32) -> Direction {
+    if x1 - x0 > 0 {
+        Direction::Right
+    }
+    else if x1 - x0 < 0 {
+        Direction::Left
+    }
+    else if y1 - y0 > 0 {
+        Direction::Down
+    }
+    else {
+        Direction::Up
+    }
+}
+
+fn perform_action_logic(entity: &mut Entity, action: Action, tile_grid: &mut TileGrid,
+                        is_player: bool, pl_x: i32, pl_y: i32) -> Option<()> {
     match action {
         Action::Wait => {},//entity.action_queue.as_mut()?.current = None,
         Action::Move(move_x, move_y) => {
             // set animation direction based on move direction
             let logical = entity.logical_pos.as_ref()?;
-            let dx: i32 = (move_x - logical.x) as i32;
-            let dy: i32 = (move_y - logical.y) as i32;
             let dir_opt = if let Some(ri) = entity.render_info.as_mut() {
-                let dir = if dx > 0 {
-                    Direction::Right
-                }
-                else if dx < 0 {
-                    Direction::Left
-                }
-                else {
-                    if dy > 0 {
-                        Direction::Down
-                    }
-                    else {
-                        Direction::Up
-                    }
-                };
+                let dir = get_direction(logical.x, logical.y, move_x, move_y);
                 ri.frames = get_walk_anim(entity.name, &dir);
                 Some(dir)
             } else {
@@ -172,6 +170,12 @@ fn perform_action_logic(entity: &mut Entity, action: Action, tile_grid: &mut Til
         },
         Action::Attack(id) => {
             entity.combat_info.as_mut()?.current_attack = Some(id);
+            let lp = entity.logical_pos.as_ref()?;
+            let dir = get_direction(lp.x, lp.y, pl_x, pl_y);
+            if let Some(ri) = entity.render_info.as_mut() {
+                ri.frames = get_walk_anim(entity.name, &dir);
+            }
+            entity.vision_info.as_mut()?.dir = dir;
         },
         Action::Look(dir) => {
             entity.vision_info.as_mut()?.dir = dir;

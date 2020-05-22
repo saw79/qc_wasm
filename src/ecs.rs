@@ -6,7 +6,7 @@ pub struct LogicalPos {
     pub y: i32,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum AlertState {
     PATROL,
     SEARCH,

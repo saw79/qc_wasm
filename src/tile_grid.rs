@@ -1,6 +1,6 @@
 use std::f32;
 
-use constants::{PLAYER_VISION, ENEMY_VISION};
+use constants::{PLAYER_VISION};
 use core::Direction;
 use util::rand_usize;
 use bresenham::get_line;
@@ -105,10 +105,22 @@ impl TileGrid {
                               max_dist: i32, dir_opt: Option<&Direction>) -> bool {
         // 0. special case of next to
         if x0 == x1 && (y1-y0).abs() <= 1 {
-            return true;
+            let behind = match dir_opt {
+                Some(&Direction::Down) if y1 == x0 - 1 => true,
+                Some(&Direction::Up) if y1 == x0 + 1 => true,
+                _ => false,
+            };
+            console_log!("behind: {}", behind);
+            return !behind;
         }
         if y0 == y1 && (x1-x0).abs() <= 1 {
-            return true;
+            let behind = match dir_opt {
+                Some(&Direction::Right) if x1 == x0 - 1 => true,
+                Some(&Direction::Left) if x1 == x0 + 1 => true,
+                _ => false,
+            };
+            console_log!("behind: {}", behind);
+            return !behind;
         }
 
         // 1. check direction and radius
