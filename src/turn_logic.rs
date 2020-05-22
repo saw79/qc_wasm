@@ -79,6 +79,12 @@ fn compute_turn(state: &mut GameState) -> Option<Action> {
     let id = state.curr_turn;
     let aq = state.entity_map.get(&id)?.action_queue.as_ref()?;
 
+    /* logic is:
+     * 1. pull from ActionQueue
+     * 2. pull from EntityTarget
+     * 3. block for human / AI for computer
+     */
+
     if aq.queue.len() > 0 {
         Some(state.entity_map.get_mut(&id)?.action_queue.as_mut()?.queue.remove(0))
     } else if let Some(tgt) = state.entity_map.get(&id)?.entity_target.as_ref() {

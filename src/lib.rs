@@ -211,25 +211,21 @@ impl GameState {
             if let Some(id) = self.get_entity_at(wx_int, wy_int) {
                 self.entity_map.get_mut(&0)?.entity_target = Some(ecs::EntityTarget { id: id });
                 clicked_enemy = true;
+
+                // TARGET will feed turn system, return
             }
 
-            // check path, either move or attack enemy
+            // check path to click pos, either move or attack enemy
             match path_logic::get_path(x0, y0, wx_int, wy_int, &self.tile_grid) {
                 Some((mut path, _cost)) => {
                     path.remove(0);
                     if path.len() == 0 {
-                        console_log!("rust lib: path len is 0, how???");
-                    } else {
-                        if clicked_enemy {
-                            // might be redundant!!! TODO
-                            self.entity_map.get_mut(&0)?.action_queue.as_mut()?.queue =
-                                vec![ecs::Action::Move(path[0].0, path[0].1)];
-                        } else {
-                            let new_q = path.into_iter()
-                                .map(|p| ecs::Action::Move(p.0, p.1)).collect();
-                            self.entity_map.get_mut(&0)?.action_queue.as_mut()
-                                .map(|aq| aq.queue = new_q);
-                        }
+                        console_log!("rust lib: path len is 0 but returned some, how???");
+                    } else if !clicked_enemy {
+                        let new_q = path.into_iter()
+                            .map(|p| ecs::Action::Move(p.0, p.1)).collect();
+                        self.entity_map.get_mut(&0)?.action_queue.as_mut()
+                            .map(|aq| aq.queue = new_q);
                     }
                 },
                 None => console_log!("  no path"),
