@@ -20,6 +20,13 @@ function loadAllImages() {
   assets["cog_fill"] = loadImage("assets/cog_fill.png");
   assets["health_bar"] = loadImage("assets/health_bar.png");
   assets["vision_wedge"] = loadImage("assets/enemy_vision_wedge.png");
+  assets["btn_small_up"] = loadImage("assets/UIImages/button_small_up.png");
+  assets["btn_small_down"] = loadImage("assets/UIImages/button_small_down.png");
+  assets["btn_small_checked"] = loadImage("assets/UIImages/button_small_checked.png");
+  assets["btn_skin_wait"] = loadImage("assets/UIImages/btn_wait_skin.png");
+  assets["btn_skin_bag"] = loadImage("assets/UIImages/btn_bag_skin.png");
+  assets["btn_skin_grab"] = loadImage("assets/UIImages/btn_grab_skin.png");
+  assets["btn_skin_target"] = loadImage("assets/UIImages/btn_target_skin.png");
 }
 
 export function jsDrawImage(ctx, imgName, sx, sy, sw, sh, x, y, w, h) {

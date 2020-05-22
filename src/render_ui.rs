@@ -3,10 +3,13 @@ use crate::{
     jsDrawImage,
 };
 
+use user_interface::{ButtonType, ButtonState};
+
 pub fn draw_ui(state: &GameState) -> Option<()> {
     let ci = state.entity_map.get(&0)?.combat_info.as_ref()?;
     draw_status_bar(state, ci.health, ci.max_health, true);
     draw_status_bar(state, ci.cognition, ci.max_cognition, false);
+    draw_main_buttons(state);
     Some(())
 }
 
@@ -54,4 +57,28 @@ float imHeight = Constants.HEALTH_BAR_SIZE / 6;
 experienceImage = new Image(resourceManager.findRegion("experience_bar"));
 experienceImage.setBounds(0, height - imHeight*.75f, width*experiencePercent, imHeight/2);
 */
+
+/*
+assets["btn_small_up"] = loadImage("assets/UIImages/button_small_up.png");
+assets["btn_small_down"] = loadImage("assets/UIImages/button_small_down.png");
+assets["btn_small_checked"] = loadImage("assets/UIImages/button_small_checked.png");
+*/
+fn draw_main_buttons(state: &GameState) {
+    for button in state.ui.buttons.values() {
+        match button.state {
+            ButtonState::UP => jsDrawImage(&state.ctx, "btn_small_up", 0, 0, 128, 128,
+                                           button.x, button.y, button.width, button.height),
+            ButtonState::DOWN => jsDrawImage(&state.ctx, "btn_small_down", 0, 0, 128, 128,
+                                             button.x, button.y, button.width, button.height),
+            ButtonState::CHECKED => jsDrawImage(&state.ctx, "btn_small_checked", 0, 0, 128, 128,
+                                                button.x, button.y, button.width, button.height),
+        };
+        match &button.skin_img {
+            Some(si) => jsDrawImage(&state.ctx, &si, 0, 0, 64, 64,
+                                    button.x+button.width/4, button.y+button.height/4,
+                                    button.width/2, button.height/2),
+            None => {},
+        };
+    }
+}
 

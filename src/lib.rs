@@ -28,6 +28,7 @@ mod ai_logic;
 mod combat_logic;
 mod bresenham;
 mod level_gen;
+mod user_interface;
 
 #[wasm_bindgen(raw_module = "../app.js")]
 extern "C" {
@@ -47,6 +48,7 @@ extern "C" {
 pub struct GameState {
     ctx: CanvasRenderingContext2d,
     ctx_alpha: CanvasRenderingContext2d,
+    ui: user_interface::UserInterface,
     camera: core::Camera,
     tile_grid: tile_grid::TileGrid,
     entity_map: HashMap<usize, ecs::Entity>,
@@ -63,7 +65,13 @@ impl GameState {
     #[wasm_bindgen(constructor)]
     pub fn new(ctx: CanvasRenderingContext2d, ctx_aplha: CanvasRenderingContext2d,
                width: i32, height: i32) -> Self {
+        // initialize camera/grid/level
         let mut camera = core::Camera::new(40, 40, width, height);
+
+        // initialize user interface
+        let ui = user_interface::UserInterface::new(camera.canvas_width,
+                                                    camera.canvas_height,
+                                                    camera.tile_pix);
 
         let mut tile_grid = tile_grid::TileGrid::new(40, 40);
 
@@ -88,6 +96,7 @@ impl GameState {
         GameState {
             ctx: ctx,
             ctx_alpha: ctx_aplha,
+            ui: ui,
             camera: camera,
             tile_grid: tile_grid,
             entity_map: entity_map,
@@ -110,6 +119,26 @@ impl GameState {
     }
 
     pub fn receive_click(&mut self, mx: i32, my: i32, is_down: bool) {
+        // USER INTERFACE
+        if is_down {
+            match self.ui.log_click_down(mx, my) {
+                Some(bt) => {
+                    console_log!("Clicked {:?}", bt);
+                    return;
+                },
+                None => {},
+            };
+        } else {
+            match self.ui.log_click_up(mx, my) {
+                Some(bt) => {
+                    console_log!("Released {:?}", bt);
+                    return;
+                },
+                None => {},
+            };
+        }
+
+        // GAME PLAY
         if is_down {
             self.last_click_pos = (mx, my);
             self.last_camera_pos = (self.camera.x, self.camera.y);
@@ -127,6 +156,10 @@ impl GameState {
     }
 
     pub fn receive_drag(&mut self, mx: i32, my: i32) {
+        if let Some(_) = self.ui.button_down {
+            return;
+        }
+
         let (mx0, my0) = self.last_click_pos;
         let (cx0, cy0) = self.last_camera_pos;
         let dx: f32 = (mx0 as f32 - mx as f32) / self.camera.tile_pix as f32;
