@@ -103,6 +103,14 @@ impl TileGrid {
 
     pub fn visibility_from_to(&self, x0: i32, y0: i32, x1: i32, y1: i32,
                               max_dist: i32, dir_opt: Option<&Direction>) -> bool {
+        // 0. special case of next to
+        if x0 == x1 && (y1-y0).abs() <= 1 {
+            return true;
+        }
+        if y0 == y1 && (x1-x0).abs() <= 1 {
+            return true;
+        }
+
         // 1. check direction and radius
         let dist = (((x1 - x0).pow(2) + (y1 - y0).pow(2)) as f32).sqrt();
         if dist > max_dist as f32 {
