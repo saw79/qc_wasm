@@ -123,7 +123,6 @@ impl GameState {
         if is_down {
             match self.ui.log_click_down(mx, my) {
                 Some(bt) => {
-                    console_log!("Clicked {:?}", bt);
                     return;
                 },
                 None => {},
@@ -131,7 +130,13 @@ impl GameState {
         } else {
             match self.ui.log_click_up(mx, my) {
                 Some(bt) => {
-                    console_log!("Released {:?}", bt);
+                    match bt {
+                        user_interface::ButtonType::WAIT   => {self.player_wait();},
+                        user_interface::ButtonType::BAG    => console_log!("bag not implemented"),
+                        user_interface::ButtonType::GRAB   => console_log!("grab not implemented"),
+                        user_interface::ButtonType::TARGET => console_log!("target not implemented"),
+                        user_interface::ButtonType::ATTACK => {self.player_attack();},
+                    };
                     return;
                 },
                 None => {},
