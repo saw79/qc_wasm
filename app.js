@@ -2,31 +2,37 @@ import init, { GameState } from "./pkg/qc_wasm.js"
 
 var assets = {};
 
-function loadImage(path) {
+async function loadImage(path) {
   var img = new Image();
   img.src = path;
+  img.decode();
   return img;
 }
 
-function loadAllImages() {
-  assets["prison_tiles"] = loadImage("assets/prison_tiles.png");
-  assets["player_none"] = loadImage("assets/player_none.png");
-  assets["prison_guard"] = loadImage("assets/prison_guard.png");
-  assets["prison_soldier"] = loadImage("assets/prison_soldier.png");
-  assets["prison_warden"] = loadImage("assets/prison_warden.png");
-  assets["status_bg"] = loadImage("assets/status_bg.png");
-  assets["status_cover"] = loadImage("assets/status_cover.png");
-  assets["health_fill"] = loadImage("assets/health_fill.png");
-  assets["cog_fill"] = loadImage("assets/cog_fill.png");
-  assets["health_bar"] = loadImage("assets/health_bar.png");
-  assets["vision_wedge"] = loadImage("assets/enemy_vision_wedge.png");
-  assets["btn_small_up"] = loadImage("assets/UIImages/button_small_up.png");
-  assets["btn_small_down"] = loadImage("assets/UIImages/button_small_down.png");
-  assets["btn_small_checked"] = loadImage("assets/UIImages/button_small_checked.png");
-  assets["btn_skin_wait"] = loadImage("assets/UIImages/btn_wait_skin.png");
-  assets["btn_skin_bag"] = loadImage("assets/UIImages/btn_bag_skin.png");
-  assets["btn_skin_grab"] = loadImage("assets/UIImages/btn_grab_skin.png");
-  assets["btn_skin_target"] = loadImage("assets/UIImages/btn_target_skin.png");
+async function loadAssets() {
+  assets["prison_tiles"] = await loadImage("assets/prison_tiles.png");
+  assets["player_none"] = await loadImage("assets/player_none.png");
+  assets["prison_guard"] = await loadImage("assets/prison_guard.png");
+  assets["prison_soldier"] = await loadImage("assets/prison_soldier.png");
+  assets["prison_warden"] = await loadImage("assets/prison_warden.png");
+  assets["status_bg"] = await loadImage("assets/status_bg.png");
+  assets["status_cover"] = await loadImage("assets/status_cover.png");
+  assets["health_fill"] = await loadImage("assets/health_fill.png");
+  assets["cog_fill"] = await loadImage("assets/cog_fill.png");
+  assets["health_bar"] = await loadImage("assets/health_bar.png");
+  assets["vision_wedge"] = await loadImage("assets/enemy_vision_wedge.png");
+
+  assets["btn_small_up"] = await loadImage("assets/UIImages/button_small_up.png");
+  assets["btn_small_down"] = await loadImage("assets/UIImages/button_small_down.png");
+  assets["btn_small_checked"] = await loadImage("assets/UIImages/button_small_checked.png");
+  assets["btn_skin_wait"] = await loadImage("assets/UIImages/btn_wait_skin.png");
+  assets["btn_skin_bag"] = await loadImage("assets/UIImages/btn_bag_skin.png");
+  assets["btn_skin_grab"] = await loadImage("assets/UIImages/btn_grab_skin.png");
+  assets["btn_skin_target"] = await loadImage("assets/UIImages/btn_target_skin.png");
+
+  assets["health_orb"] = await loadImage("assets/health_orb.png");
+  assets["cognition_orb"] = await loadImage("assets/cognition_orb.png");
+  assets["rejuvination_orb"] = await loadImage("assets/rejuvination_orb.png");
 }
 
 export function jsDrawImage(ctx, imgName, sx, sy, sw, sh, x, y, w, h) {
@@ -77,6 +83,16 @@ export function jsDrawString(ctx, style, text, x, y) {
 async function run() {
   await init();
 
+  console.log('Loading assets...');
+  try {
+    await loadAssets();
+  } catch (e) {
+    console.log('FATAL: Error loading assets');
+    console.log(e);
+    return;
+  }
+  console.log('Done.');
+
   // ----------- parameters ----------------
 
   const width = window.innerWidth;
@@ -103,11 +119,10 @@ async function run() {
   canvas_alpha.height = height;
   const ctx_alpha = canvas_alpha.getContext("2d");
 
-  // load all assets
-  loadAllImages();
-
   var state = new GameState(ctx_off, ctx_alpha, width, height);
   var mouseDown = false;
+
+  var debug_freeze = false;
 
   function handleClick(cx, cy, is_down) {
     let rect = canvas.getBoundingClientRect();
@@ -153,7 +168,12 @@ async function run() {
   });
 
   window.addEventListener("keypress", function (e) {
-    state.receive_key(e.keyCode);
+    if (e.keyCode == 113) {
+      debug_freeze = !debug_freeze;
+    }
+    else {
+      state.receive_key(e.keyCode);
+    }
   });
 
   // ----------- start loop ----------------
@@ -165,7 +185,9 @@ async function run() {
     ctx.drawImage(canvas_off, 0, 0);
 
     prevTime = timestamp;
-    requestAnimationFrame(mainLoop);
+    if (!debug_freeze) {
+      requestAnimationFrame(mainLoop);
+    }
   }
 
   requestAnimationFrame(mainLoop);

@@ -10,53 +10,61 @@ use ai_logic;
 use debug::log;
 
 pub fn compute_turns(state: &mut GameState) -> Option<()> {
-    if let None = state.entity_map.get(&state.curr_turn) {
-        increment_turn(state);
-    }
+    let mut compute_next = true;
+    while compute_next {
+        compute_next = false;
 
-    if let Some(aq) = &state.entity_map.get(&state.curr_turn)?.action_queue {
-        if let Some(_) = aq.current {
-            // last turn still active, wait for it to be removed
-            return Some(());
-        } else {
-            // compute NEW turn
-            let (pl_x, pl_y) = {
-                let lp = state.entity_map.get(&0)?.logical_pos.as_ref()?;
-                (lp.x, lp.y)
-            };
-            // update alertness
-            if state.curr_turn > 0 {
-                update_alertness(
-                    state.entity_map.get_mut(&state.curr_turn)?,
-                    &state.tile_grid,
-                    pl_x, pl_y);
-            }
-            match compute_turn(state) {
-                Some(action) => {
-                    perform_action_logic(
-                        state.entity_map.get_mut(&state.curr_turn)?,
-                        action,
-                        &mut state.tile_grid,
-                        state.curr_turn == 0,
-                        pl_x, pl_y);
-
-                    // update alertness again
-                    if state.curr_turn > 0 {
-                        update_alertness(
-                            state.entity_map.get_mut(&state.curr_turn)?,
-                            &state.tile_grid,
-                            pl_x, pl_y);
-                    }
-
-                    increment_turn(state);
-                },
-                None => {},
-            };
+        if let None = state.entity_map.get(&state.curr_turn) {
+            increment_turn(state);
+            compute_next = true;
         }
-    } else {
-        // entity does not have ActionQueue comp which means we skip it
-        // (it doesn't participate in this system)
-        increment_turn(state);
+
+        if let Some(aq) = &state.entity_map.get(&state.curr_turn)?.action_queue {
+            if let Some(_) = aq.current {
+                // last turn still active, wait for it to be removed
+                return Some(());
+            } else {
+                // compute NEW turn
+                let (pl_x, pl_y) = {
+                    let lp = state.entity_map.get(&0)?.logical_pos.as_ref()?;
+                    (lp.x, lp.y)
+                };
+                // update alertness
+                if state.curr_turn > 0 {
+                    update_alertness(
+                        state.entity_map.get_mut(&state.curr_turn)?,
+                        &state.tile_grid,
+                        pl_x, pl_y);
+                }
+                match compute_turn(state) {
+                    Some(action) => {
+                        perform_action_logic(
+                            state.entity_map.get_mut(&state.curr_turn)?,
+                            action,
+                            &mut state.tile_grid,
+                            state.curr_turn == 0,
+                            pl_x, pl_y);
+
+                        // update alertness again
+                        if state.curr_turn > 0 {
+                            update_alertness(
+                                state.entity_map.get_mut(&state.curr_turn)?,
+                                &state.tile_grid,
+                                pl_x, pl_y);
+                        }
+
+                        increment_turn(state);
+                        compute_next = true;
+                    },
+                    None => {},
+                };
+            }
+        } else {
+            // entity does not have ActionQueue comp which means we skip it
+            // (it doesn't participate in this system)
+            increment_turn(state);
+            compute_next = true;
+        }
     }
 
     Some(())

@@ -74,6 +74,26 @@ pub fn create_enemy(x: i32, y: i32, name: &'static str) -> Entity {
     }
 }
 
+pub fn create_orb(x: i32, y: i32, name: &'static str) -> Entity {
+    Entity {
+        name: name,
+        logical_pos: Some(LogicalPos { x: x, y: y }),
+        vision_info: None,
+        render_info: Some(RenderInfo {
+            x: x as f32,
+            y: y as f32,
+            active: true,
+            time: 0.0,
+            frame_duration: 0.1,
+            curr_frame: 0,
+            frames: get_orb_anim(name),
+        }),
+        action_queue: None,
+        entity_target: None,
+        combat_info: None,
+    }
+}
+
 pub fn get_walk_anim(name: &'static str, dir: &Direction) -> Vec<RenderFrame> {
     let row = match dir {
         Direction::Up => 1,
@@ -92,3 +112,37 @@ pub fn get_walk_anim(name: &'static str, dir: &Direction) -> Vec<RenderFrame> {
         sheet_h: 32,
     }).collect()
 }
+
+fn get_orb_anim(name: &'static str) -> Vec<RenderFrame> {
+    vec![
+        RenderFrame {
+            sheet_name: name,
+            sheet_x: 0,
+            sheet_y: 0,
+            sheet_w: 64,
+            sheet_h: 64,
+        },
+        RenderFrame {
+            sheet_name: name,
+            sheet_x: 64,
+            sheet_y: 0,
+            sheet_w: 64,
+            sheet_h: 64,
+        },
+        RenderFrame {
+            sheet_name: name,
+            sheet_x: 0,
+            sheet_y: 64,
+            sheet_w: 64,
+            sheet_h: 64,
+        },
+        RenderFrame {
+            sheet_name: name,
+            sheet_x: 64,
+            sheet_y: 64,
+            sheet_w: 64,
+            sheet_h: 64,
+        },
+        ]
+}
+

@@ -89,10 +89,35 @@ impl GameState {
 
         tile_grid.update_visibility(px, py);
 
+        // ----- add entities ------
+
+        let mut id = 0;
+
         let mut entity_map = HashMap::new();
-        entity_map.insert(0, factory::create_player(px, py));
-        let (ex, ey) = tile_grid.get_random_floor();
-        entity_map.insert(1, factory::create_enemy(ex, ey, "prison_guard"));
+        entity_map.insert(id, factory::create_player(px, py));
+        id += 1;
+
+        for _ in 0..1 {
+            let (ex, ey) = tile_grid.get_random_floor();
+            entity_map.insert(id, factory::create_enemy(ex, ey, "prison_guard"));
+            id += 1;
+        }
+
+        for _ in 0..6 {
+            let (ox, oy) = tile_grid.get_random_floor();
+            entity_map.insert(id, factory::create_orb(ox, oy, "health_orb"));
+            id +=1;
+
+            let (ox, oy) = tile_grid.get_random_floor();
+            entity_map.insert(id, factory::create_orb(ox, oy, "cognition_orb"));
+            id +=1;
+        }
+
+        for _ in 0..2 {
+            let (ox, oy) = tile_grid.get_random_floor();
+            entity_map.insert(id, factory::create_orb(ox, oy, "rejuvination_orb"));
+            id +=1;
+        }
 
         GameState {
             ctx: ctx,
@@ -182,7 +207,7 @@ impl GameState {
             constants::KEY_G => { console_log!("GRAB"); Some(()) },
             constants::KEY_T => { console_log!("TARGET"); Some(()) },
             constants::KEY_W => self.player_wait(),
-            _ => Some(()),
+            _ => { console_log!("received key {}", code); Some(()) },
         };
     }
 

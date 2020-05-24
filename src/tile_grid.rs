@@ -110,7 +110,6 @@ impl TileGrid {
                 Some(&Direction::Up) if y1 == x0 + 1 => true,
                 _ => false,
             };
-            console_log!("behind: {}", behind);
             return !behind;
         }
         if y0 == y1 && (x1-x0).abs() <= 1 {
@@ -119,7 +118,6 @@ impl TileGrid {
                 Some(&Direction::Left) if x1 == x0 + 1 => true,
                 _ => false,
             };
-            console_log!("behind: {}", behind);
             return !behind;
         }
 
