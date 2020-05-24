@@ -19,8 +19,9 @@ fn process_attack(state: &mut GameState, id: usize) -> Option<()> {
     state.entity_map.get_mut(&tgt_id)?.combat_info.as_mut()?.health -= dmg;
 
     if state.entity_map.get(&tgt_id)?.combat_info.as_ref()?.health <= 0 {
-        console_log!("DEAD!");
-        state.entity_map.remove(&tgt_id);
+        //console_log!("DEAD!");
+        //state.entity_map.remove(&tgt_id);
+        state.entity_map.get_mut(&tgt_id)?.dead = true;
     }
 
     state.entity_map.get_mut(&id)?.combat_info.as_mut()?.current_attack = None;

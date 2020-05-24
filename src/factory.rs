@@ -5,6 +5,7 @@ use ecs::*;
 pub fn create_player(x: i32, y: i32) -> Entity {
     Entity {
         name: "player_none",
+        dead: false,
         logical_pos: Some(LogicalPos { x: x, y: y }),
         vision_info: None,
         render_info: Some(RenderInfo {
@@ -26,11 +27,12 @@ pub fn create_player(x: i32, y: i32) -> Entity {
             max_health: 10,
             cognition: 10,
             max_cognition: 10,
-            damage: 1,
+            damage: 2,
             absorption: 0,
             dodge: 0,
             current_attack: None,
         }),
+        pickup_info: None,
     }
 }
 
@@ -39,6 +41,7 @@ pub fn create_enemy(x: i32, y: i32, name: &'static str) -> Entity {
 
     Entity {
         name: name,
+        dead: false,
         logical_pos: Some(LogicalPos { x: x, y: y }),
         vision_info: Some(VisionInfo {
             is_wedge: true,
@@ -71,12 +74,14 @@ pub fn create_enemy(x: i32, y: i32, name: &'static str) -> Entity {
             dodge: 0,
             current_attack: None,
         }),
+        pickup_info: None,
     }
 }
 
 pub fn create_orb(x: i32, y: i32, name: &'static str) -> Entity {
     Entity {
         name: name,
+        dead: false,
         logical_pos: Some(LogicalPos { x: x, y: y }),
         vision_info: None,
         render_info: Some(RenderInfo {
@@ -91,7 +96,33 @@ pub fn create_orb(x: i32, y: i32, name: &'static str) -> Entity {
         action_queue: None,
         entity_target: None,
         combat_info: None,
+        pickup_info: match name {
+            "health_orb" => Some(PickupInfo { actions: get_health_orb_actions(), }),
+            "cognition_orb" => Some(PickupInfo { actions: get_cognition_orb_actions(), }),
+            "rejuvination_orb" => Some(PickupInfo { actions: get_rejuvination_orb_actions(), }),
+            _ => None,
+        },
     }
+}
+
+fn get_health_orb_actions() -> Vec<PickupAction> {
+    vec![
+        PickupAction::HEALTH_40P,
+        PickupAction::DIE,
+    ]
+}
+fn get_cognition_orb_actions() -> Vec<PickupAction> {
+    vec![
+        PickupAction::COGNITION_40P,
+        PickupAction::DIE,
+    ]
+}
+fn get_rejuvination_orb_actions() -> Vec<PickupAction> {
+    vec![
+        PickupAction::HEALTH_40P,
+        PickupAction::COGNITION_40P,
+        PickupAction::DIE,
+    ]
 }
 
 pub fn get_walk_anim(name: &'static str, dir: &Direction) -> Vec<RenderFrame> {

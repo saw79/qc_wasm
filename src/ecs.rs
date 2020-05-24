@@ -72,15 +72,28 @@ pub struct CombatInfo {
     pub current_attack: Option<usize>,
 }
 
+#[derive(Debug, Clone)]
+pub enum PickupAction {
+    DIE,
+    HEALTH_40P,
+    COGNITION_40P,
+}
+
+pub struct PickupInfo {
+    pub actions: Vec<PickupAction>,
+}
+
 // ------------------------------------------------------------
 
 pub struct Entity {
     pub name: &'static str,
+    pub dead: bool,
     pub logical_pos: Option<LogicalPos>,
     pub vision_info: Option<VisionInfo>,
     pub render_info: Option<RenderInfo>,
     pub action_queue: Option<ActionQueue>,
     pub entity_target: Option<EntityTarget>,
     pub combat_info: Option<CombatInfo>,
+    pub pickup_info: Option<PickupInfo>,
 }
 

@@ -160,7 +160,7 @@ impl GameState {
                     match bt {
                         user_interface::ButtonType::WAIT   => {self.player_wait();},
                         user_interface::ButtonType::BAG    => console_log!("bag not implemented"),
-                        user_interface::ButtonType::GRAB   => console_log!("grab not implemented"),
+                        user_interface::ButtonType::GRAB   => {self.player_grab();},
                         user_interface::ButtonType::TARGET => console_log!("target not implemented"),
                         user_interface::ButtonType::ATTACK => {self.player_attack();},
                     };
@@ -204,7 +204,7 @@ impl GameState {
         match code {
             constants::KEY_A => self.player_attack(),
             constants::KEY_B => { console_log!("OPEN BAG"); Some(()) },
-            constants::KEY_G => { console_log!("GRAB"); Some(()) },
+            constants::KEY_G => self.player_grab(),
             constants::KEY_T => { console_log!("TARGET"); Some(()) },
             constants::KEY_W => self.player_wait(),
             _ => { console_log!("received key {}", code); Some(()) },
@@ -230,6 +230,8 @@ impl GameState {
         }
 
         self.enemy_visible_prev = enemy_visible;
+
+        self.entity_map.retain(|_, e| !e.dead);
     }
 
     fn render(&mut self) {
@@ -265,10 +267,10 @@ impl GameState {
         else {
             let mut clicked_enemy = false;
             if let Some(id) = self.get_entity_at(wx_int, wy_int) {
-                self.entity_map.get_mut(&0)?.entity_target = Some(ecs::EntityTarget { id: id });
-                clicked_enemy = true;
-
-                // TARGET will feed turn system, return
+                if let Some(_) = self.entity_map.get(&id)?.combat_info.as_ref() {
+                    self.entity_map.get_mut(&0)?.entity_target = Some(ecs::EntityTarget { id: id });
+                    clicked_enemy = true;
+                }
             }
 
             // check path to click pos, either move or attack enemy
@@ -369,5 +371,82 @@ impl GameState {
 
         return false;
     }
+
+    fn player_grab(&mut self) -> Option<()> {
+        let mut player_actions = vec![];
+
+        let (px, py) = {
+            let lp = self.entity_map.get(&0)?.logical_pos.as_ref()?;
+            (lp.x, lp.y)
+        };
+
+        for (id, entity) in self.entity_map.iter_mut() {
+            if *id > 0 {
+                grab_entity(entity, px, py, &mut player_actions);
+            }
+        }
+
+        if player_actions.len() > 0 {
+            let player = self.entity_map.get_mut(&0)?;
+            for action in player_actions {
+                match action {
+                    ecs::PickupAction::HEALTH_40P => {
+                        let ci = player.combat_info.as_mut()?;
+                        let health_inc = ci.max_health*4/10;
+                        ci.health += health_inc;
+                        if ci.health > ci.max_health {
+                            ci.health = ci.max_health;
+                        }
+                        self.floating_texts.push(core::FloatingText {
+                            text: health_inc.to_string(),
+                            total_time: constants::FLOATING_TEXT_TIME,
+                            curr_time: 0.0,
+                            x: px as f32,
+                            y: py as f32,
+                        });
+                    },
+                    ecs::PickupAction::COGNITION_40P => {
+                        let ci = player.combat_info.as_mut()?;
+                        let cog_inc = ci.max_cognition*4/10;
+                        ci.cognition += cog_inc;
+                        if ci.cognition > ci.max_cognition {
+                            ci.cognition = ci.max_cognition;
+                        }
+                        self.floating_texts.push(core::FloatingText {
+                            text: cog_inc.to_string(),
+                            total_time: constants::FLOATING_TEXT_TIME,
+                            curr_time: 0.0,
+                            x: px as f32,
+                            y: py as f32,
+                        });
+                    },
+                    _ => console_log!("No implementation for player action {:?}", action),
+                };
+            }
+        }
+
+        Some(())
+    }
+
+}
+
+fn grab_entity(
+    entity: &mut ecs::Entity,
+    px: i32, py: i32,
+    player_actions: &mut Vec<ecs::PickupAction>) -> Option<()> {
+
+    let lp = entity.logical_pos.as_ref()?;
+    if lp.x == px && lp.y == py {
+        let pi = entity.pickup_info.as_ref()?;
+        for action in &pi.actions {
+            match action {
+                ecs::PickupAction::HEALTH_40P => player_actions.push(action.clone()),
+                ecs::PickupAction::COGNITION_40P => player_actions.push(action.clone()),
+                ecs::PickupAction::DIE => entity.dead = true,
+            };
+        }
+    }
+
+    Some(())
 }
 
