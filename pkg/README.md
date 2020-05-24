@@ -4,5 +4,5 @@ This is an experimental rewrite of an Android roguelike game I wrote a few years
 
 The latest build is playable at [https://saw79.github.io/qc_wasm](https://saw79.github.io/qc_wasm)
 
-(Note: I am still extremely early in development)
+(Note: development is extremely early so don't expect much yet)
 

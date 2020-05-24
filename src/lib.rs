@@ -327,12 +327,12 @@ impl GameState {
     }
 
     fn get_entity_at(&self, x: i32, y: i32) -> Option<usize> {
-        for (&id, entity) in &self.entity_map {
-            if id == 0 { continue; }
+        for (id, entity) in self.entity_map.iter() {
+            if *id == 0 { continue; }
 
             if let Some(pos) = &entity.logical_pos {
                 if pos.x == x && pos.y == y {
-                    return Some(id);
+                    return Some(*id);
                 }
             }
         }
@@ -345,7 +345,9 @@ impl GameState {
             if *id > 0 {
                 if let Some(lp) = entity.logical_pos.as_ref() {
                     if self.tile_grid.get_visibility(lp.x, lp.y) == &tile_grid::Visibility::VISIBLE {
-                        return true;
+                        if let Some(_) = entity.combat_info.as_ref() {
+                            return true;
+                        }
                     }
                 }
             }
