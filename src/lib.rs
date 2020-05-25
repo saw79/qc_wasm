@@ -87,8 +87,6 @@ impl GameState {
         camera.height *= zoom;
         camera.tile_pix = (camera.tile_pix as f32 / zoom) as i32;*/
 
-        tile_grid.update_visibility(px, py);
-
         // ----- add entities ------
 
         let mut id = 0;
@@ -97,7 +95,10 @@ impl GameState {
         entity_map.insert(id, factory::create_player(px, py));
         id += 1;
 
-        for _ in 0..1 {
+        let radius = entity_map.get(&0).unwrap().vision_info.as_ref().unwrap().radius;
+        tile_grid.update_visibility(px, py, radius);
+
+        for _ in 0..5 {
             let (ex, ey) = tile_grid.get_random_floor();
             entity_map.insert(id, factory::create_enemy(ex, ey, "prison_guard"));
             id += 1;
@@ -232,6 +233,16 @@ impl GameState {
         self.enemy_visible_prev = enemy_visible;
 
         self.entity_map.retain(|_, e| !e.dead);
+    }
+
+    pub fn update_visibility(&mut self) {
+        if let Some(player) = self.entity_map.get(&0) {
+            if let Some(lp) = player.logical_pos.as_ref() {
+                if let Some(vi) = player.vision_info.as_ref() {
+                    self.tile_grid.update_visibility(lp.x, lp.y, vi.radius);
+                }
+            }
+        }
     }
 
     fn render(&mut self) {
@@ -411,6 +422,11 @@ impl GameState {
                         if ci.cognition > ci.max_cognition {
                             ci.cognition = ci.max_cognition;
                         }
+
+                        combat_logic::update_vision(player);
+                        let lp = player.logical_pos.as_ref()?;
+                        let vi = player.vision_info.as_ref()?;
+                        self.tile_grid.update_visibility(lp.x, lp.y, vi.radius);
 
                         self.floating_texts.push(core::FloatingText::new(
                                 c_inc.to_string(), "floating_blue".to_string(), delay, px as f32, py as f32));

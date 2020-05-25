@@ -16,6 +16,7 @@ pub enum AlertState {
 pub struct VisionInfo {
     pub is_wedge: bool,
     pub radius: i32,
+    pub max_radius: i32,
     pub dir: Direction,
     pub alert_state: AlertState,
     pub last_location: (i32, i32),
@@ -87,6 +88,7 @@ pub struct PickupInfo {
 
 pub struct Entity {
     pub name: &'static str,
+    pub is_player: bool,
     pub dead: bool,
     pub logical_pos: Option<LogicalPos>,
     pub vision_info: Option<VisionInfo>,

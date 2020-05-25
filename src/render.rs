@@ -102,36 +102,38 @@ fn draw_entity(ctx: &CanvasRenderingContext2d, entity: &Entity,
     let (px, py) = world_to_pixel(ri.x, ri.y, camera);
 
     // vision
-    if let Some(vi) = entity.vision_info.as_ref() {
-        let vi_size: i32 = (2*vi.radius + 1) * camera.tile_pix;
+    if is_enemy {
+        if let Some(vi) = entity.vision_info.as_ref() {
+            let vi_size: i32 = (2*vi.radius + 1) * camera.tile_pix;
 
-        if vi.is_wedge {
-            let angle = match vi.dir {
-                Direction::Right => 0.0,
-                Direction::Down => f64::consts::PI/2.0,
-                Direction::Left => f64::consts::PI*2.0/2.0,
-                Direction::Up => f64::consts::PI*3.0/2.0,
-            };
+            if vi.is_wedge {
+                let angle = match vi.dir {
+                    Direction::Right => 0.0,
+                    Direction::Down => f64::consts::PI/2.0,
+                    Direction::Left => f64::consts::PI*2.0/2.0,
+                    Direction::Up => f64::consts::PI*3.0/2.0,
+                };
 
-            ctx.save();
-            let (center_x, center_y) = (px + camera.tile_pix/2, py + camera.tile_pix/2);
-            if let Err(_) = ctx.translate(center_x as f64, center_y as f64) {
+                ctx.save();
+                let (center_x, center_y) = (px + camera.tile_pix/2, py + camera.tile_pix/2);
+                if let Err(_) = ctx.translate(center_x as f64, center_y as f64) {
+                    ctx.restore();
+                    return None;
+                }
+                if let Err(_) = ctx.rotate(angle) {
+                    ctx.restore();
+                    return None;
+                }
+
+                jsDrawImageAlpha(ctx, "vision_wedge",
+                                 0, 0, 256, 256,
+                                 -vi_size/2, -vi_size/2, vi_size, vi_size,
+                                 0.05);
+
                 ctx.restore();
-                return None;
+            } else {
+                console_log!("Vision Info rendering for !is_wedge not yet implemented!!!");
             }
-            if let Err(_) = ctx.rotate(angle) {
-                ctx.restore();
-                return None;
-            }
-
-            jsDrawImageAlpha(ctx, "vision_wedge",
-                             0, 0, 256, 256,
-                             -vi_size/2, -vi_size/2, vi_size, vi_size,
-                             0.05);
-
-            ctx.restore();
-        } else {
-            console_log!("Vision Info rendering for !is_wedge not yet implemented!!!");
         }
     }
 

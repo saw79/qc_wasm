@@ -171,7 +171,8 @@ fn perform_action_logic(entity: &mut Entity, action: Action, tile_grid: &mut Til
             }
 
             if is_player {
-                tile_grid.update_visibility(move_x, move_y);
+                let radius = entity.vision_info.as_ref()?.radius;
+                tile_grid.update_visibility(move_x, move_y, radius);
             }
             
             entity.action_queue.as_mut()?.current = Some(action);

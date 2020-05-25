@@ -1,6 +1,5 @@
 use std::f32;
 
-use constants::{PLAYER_VISION};
 use core::Direction;
 use util::rand_usize;
 use bresenham::get_line;
@@ -77,7 +76,7 @@ impl TileGrid {
         }
     }*/
 
-    pub fn update_visibility(&mut self, x0: i32, y0: i32) {
+    pub fn update_visibility(&mut self, x0: i32, y0: i32, radius: i32) {
         for x in 0..self.width {
             for y in 0..self.height {
                 let (x, y) = (x as i32, y as i32);
@@ -88,7 +87,7 @@ impl TileGrid {
                 }
 
                 // fill in potential VISIBLE's
-                if (x - x0).abs() <= PLAYER_VISION && (y - y0).abs() <= PLAYER_VISION {
+                if (x - x0).abs() <= radius && (y - y0).abs() <= radius {
                     let line = get_line(x0, y0, x, y);
                     for (xi, yi) in line {
                         self.set_visibility(xi, yi, Visibility::VISIBLE);

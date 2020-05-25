@@ -1,13 +1,21 @@
-use constants::ENEMY_VISION;
+use constants::{PLAYER_VISION, ENEMY_VISION};
 use core::Direction;
 use ecs::*;
 
 pub fn create_player(x: i32, y: i32) -> Entity {
     Entity {
         name: "player_none",
+        is_player: true,
         dead: false,
         logical_pos: Some(LogicalPos { x: x, y: y }),
-        vision_info: None,
+        vision_info: Some(VisionInfo {
+            is_wedge: false,
+            radius: PLAYER_VISION,
+            max_radius: PLAYER_VISION,
+            dir: Direction::Down,
+            alert_state: AlertState::KILL,
+            last_location: (0, 0),
+        }),
         render_info: Some(RenderInfo {
             x: x as f32,
             y: y as f32,
@@ -41,11 +49,13 @@ pub fn create_enemy(x: i32, y: i32, name: &'static str) -> Entity {
 
     Entity {
         name: name,
+        is_player: false,
         dead: false,
         logical_pos: Some(LogicalPos { x: x, y: y }),
         vision_info: Some(VisionInfo {
             is_wedge: true,
             radius: ENEMY_VISION,
+            max_radius: ENEMY_VISION,
             dir: dir.clone(),
             alert_state: AlertState::PATROL,
             last_location: (x, y),
@@ -81,6 +91,7 @@ pub fn create_enemy(x: i32, y: i32, name: &'static str) -> Entity {
 pub fn create_orb(x: i32, y: i32, name: &'static str) -> Entity {
     Entity {
         name: name,
+        is_player: false,
         dead: false,
         logical_pos: Some(LogicalPos { x: x, y: y }),
         vision_info: None,
