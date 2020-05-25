@@ -90,7 +90,13 @@ fn draw_entity(ctx: &CanvasRenderingContext2d, entity: &Entity,
     let ri = entity.render_info.as_ref()?;
 
     if tile_grid.get_visibility(ri.x as i32, ri.y as i32) != &Visibility::VISIBLE {
-        return Some(());
+        if let Some(_) = entity.combat_info.as_ref() {
+            return Some(());
+        }
+
+        if tile_grid.get_visibility(ri.x as i32, ri.y as i32) == &Visibility::UNSEEN {
+            return Some(());
+        }
     }
 
     let (px, py) = world_to_pixel(ri.x, ri.y, camera);
