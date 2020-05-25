@@ -107,21 +107,21 @@ pub fn create_orb(x: i32, y: i32, name: &'static str) -> Entity {
 
 fn get_health_orb_actions() -> Vec<PickupAction> {
     vec![
-        PickupAction::HEALTH_40P,
-        PickupAction::DIE,
+        PickupAction::Health40p,
+        PickupAction::Die,
     ]
 }
 fn get_cognition_orb_actions() -> Vec<PickupAction> {
     vec![
-        PickupAction::COGNITION_40P,
-        PickupAction::DIE,
+        PickupAction::Cognition40p,
+        PickupAction::Die,
     ]
 }
 fn get_rejuvination_orb_actions() -> Vec<PickupAction> {
     vec![
-        PickupAction::HEALTH_40P,
-        PickupAction::COGNITION_40P,
-        PickupAction::DIE,
+        PickupAction::Health40p,
+        PickupAction::Cognition40p,
+        PickupAction::Die,
     ]
 }
 

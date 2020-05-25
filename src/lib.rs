@@ -388,37 +388,33 @@ impl GameState {
 
         if player_actions.len() > 0 {
             let player = self.entity_map.get_mut(&0)?;
+            let mut delay = 0.0;
+            let d_inc = 0.3;
             for action in player_actions {
                 match action {
-                    ecs::PickupAction::HEALTH_40P => {
+                    ecs::PickupAction::Health40p => {
                         let ci = player.combat_info.as_mut()?;
-                        let health_inc = ci.max_health*4/10;
-                        ci.health += health_inc;
+                        let h_inc = ci.max_health*4/10;
+                        ci.health += h_inc;
                         if ci.health > ci.max_health {
                             ci.health = ci.max_health;
                         }
-                        self.floating_texts.push(core::FloatingText {
-                            text: health_inc.to_string(),
-                            total_time: constants::FLOATING_TEXT_TIME,
-                            curr_time: 0.0,
-                            x: px as f32,
-                            y: py as f32,
-                        });
+
+                        self.floating_texts.push(core::FloatingText::new(
+                                h_inc.to_string(), "floating_green".to_string(), delay, px as f32, py as f32));
+                        delay += d_inc;
                     },
-                    ecs::PickupAction::COGNITION_40P => {
+                    ecs::PickupAction::Cognition40p => {
                         let ci = player.combat_info.as_mut()?;
-                        let cog_inc = ci.max_cognition*4/10;
-                        ci.cognition += cog_inc;
+                        let c_inc = ci.max_cognition*4/10;
+                        ci.cognition += c_inc;
                         if ci.cognition > ci.max_cognition {
                             ci.cognition = ci.max_cognition;
                         }
-                        self.floating_texts.push(core::FloatingText {
-                            text: cog_inc.to_string(),
-                            total_time: constants::FLOATING_TEXT_TIME,
-                            curr_time: 0.0,
-                            x: px as f32,
-                            y: py as f32,
-                        });
+
+                        self.floating_texts.push(core::FloatingText::new(
+                                c_inc.to_string(), "floating_blue".to_string(), delay, px as f32, py as f32));
+                        delay += d_inc;
                     },
                     _ => console_log!("No implementation for player action {:?}", action),
                 };
@@ -440,9 +436,9 @@ fn grab_entity(
         let pi = entity.pickup_info.as_ref()?;
         for action in &pi.actions {
             match action {
-                ecs::PickupAction::HEALTH_40P => player_actions.push(action.clone()),
-                ecs::PickupAction::COGNITION_40P => player_actions.push(action.clone()),
-                ecs::PickupAction::DIE => entity.dead = true,
+                ecs::PickupAction::Health40p => player_actions.push(action.clone()),
+                ecs::PickupAction::Cognition40p => player_actions.push(action.clone()),
+                ecs::PickupAction::Die => entity.dead = true,
             };
         }
     }

@@ -165,8 +165,10 @@ fn draw_entity(ctx: &CanvasRenderingContext2d, entity: &Entity,
 
 fn draw_floating_text(state: &GameState) {
     for ft in &state.floating_texts {
-        let (px, py) = world_to_pixel(ft.x, ft.y, &state.camera);
-        jsDrawString(&state.ctx, "floating", &ft.text, px, py);
+        if ft.curr_time >= 0.0 {
+            let (px, py) = world_to_pixel(ft.x, ft.y, &state.camera);
+            jsDrawString(&state.ctx, &ft.style, &ft.text, px, py);
+        }
     }
 }
 

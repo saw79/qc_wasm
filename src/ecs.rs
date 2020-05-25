@@ -74,9 +74,9 @@ pub struct CombatInfo {
 
 #[derive(Debug, Clone)]
 pub enum PickupAction {
-    DIE,
-    HEALTH_40P,
-    COGNITION_40P,
+    Die,
+    Health40p,
+    Cognition40p,
 }
 
 pub struct PickupInfo {

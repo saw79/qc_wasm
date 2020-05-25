@@ -52,9 +52,19 @@ export function jsAlphaToMain(ctx, ctx_alpha, alpha) {
 }
 
 export function jsDrawString(ctx, style, text, x, y) {
-  if (style == "floating") {
+  if (style == "floating_red") {
     ctx.font = "32px Impact";
     ctx.fillStyle = "red";
+    ctx.textAlign = "center";
+  }
+  else if (style == "floating_green") {
+    ctx.font = "32px Impact";
+    ctx.fillStyle = "rgb(0, 255, 0)";
+    ctx.textAlign = "center";
+  }
+  else if (style == "floating_blue") {
+    ctx.font = "32px Impact";
+    ctx.fillStyle = "blue";
     ctx.textAlign = "center";
   }
   else if (style == "patrol") {
