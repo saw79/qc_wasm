@@ -46,7 +46,7 @@ pub struct RenderInfo {
 pub enum Action {
     Wait,
     Move(i32, i32),
-    Attack(usize),
+    Attack(EntityId),
     Look(Direction),
 }
 
@@ -58,7 +58,7 @@ pub struct ActionQueue {
 
 #[derive(Debug)]
 pub struct EntityTarget {
-    pub id: usize,
+    pub id: EntityId,
 }
 
 #[derive(Debug)]
@@ -70,7 +70,7 @@ pub struct CombatInfo {
     pub damage: i32,
     pub absorption: i32,
     pub dodge: i32,
-    pub current_attack: Option<usize>,
+    pub current_attack: Option<EntityId>,
 }
 
 #[derive(Debug, Clone)]
@@ -85,6 +85,8 @@ pub struct PickupInfo {
 }
 
 // ------------------------------------------------------------
+
+pub type EntityId = u32;
 
 pub struct Entity {
     pub name: &'static str,

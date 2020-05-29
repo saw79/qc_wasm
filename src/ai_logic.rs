@@ -15,32 +15,28 @@ use rand::prelude::*;
  *      move randomly
  */
 
-pub fn compute_action(entity: &Entity, tile_grid: &TileGrid, player: &Entity) -> Option<Action> {
+pub fn compute_action(entity: &Entity, tile_grid: &TileGrid, pl_x: i32, pl_y: i32) -> Option<Action> {
     if let Some(vi) = entity.vision_info.as_ref() {
         match vi.alert_state {
             AlertState::PATROL => compute_action_patrol(entity, tile_grid),
             AlertState::SEARCH => compute_action_search(entity, tile_grid),
-            AlertState::KILL => compute_action_kill(entity, tile_grid, player),
+            AlertState::KILL => compute_action_kill(entity, tile_grid, pl_x, pl_y),
         }
     } else {
         compute_action_patrol(entity, tile_grid)
     }
 }
 
-pub fn compute_action_kill(entity: &Entity, tile_grid: &TileGrid, player: &Entity) -> Option<Action> {
+pub fn compute_action_kill(entity: &Entity, tile_grid: &TileGrid, pl_x: i32, pl_y: i32) -> Option<Action> {
     let (x0, y0) = {
         let lp = entity.logical_pos.as_ref()?;
         (lp.x, lp.y)
     };
-    let (x1, y1) = {
-        let lp = player.logical_pos.as_ref()?;
-        (lp.x, lp.y)
-    };
 
-    if (x1-x0).abs() <= 1 && (y1-y0).abs() <= 1 {
+    if (pl_x-x0).abs() <= 1 && (pl_y-y0).abs() <= 1 {
         Some(Action::Attack(0))
     } else {
-        get_move_toward(entity, tile_grid, x1, y1)
+        get_move_toward(entity, tile_grid, pl_x, pl_y)
     }
 }
 

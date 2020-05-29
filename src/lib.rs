@@ -6,7 +6,7 @@ extern crate rand;
 use std::collections::HashMap;
 
 use wasm_bindgen::prelude::*;
-use web_sys::CanvasRenderingContext2d;
+use web_sys::{CanvasRenderingContext2d, window};
 
 #[macro_use]
 mod debug;
@@ -16,6 +16,7 @@ mod constants;
 mod core;
 mod tile_grid;
 mod ecs;
+mod turn_queue;
 mod util;
 mod factory;
 mod render;
@@ -29,6 +30,12 @@ mod combat_logic;
 mod bresenham;
 mod level_gen;
 mod user_interface;
+
+const TIMING: bool = false;
+
+fn time() -> f64 {
+    window().unwrap().performance().unwrap().now()
+}
 
 #[wasm_bindgen(raw_module = "../app.js")]
 extern "C" {
@@ -46,13 +53,14 @@ extern "C" {
 
 #[wasm_bindgen]
 pub struct GameState {
+    t0: f64,
     ctx: CanvasRenderingContext2d,
     ctx_alpha: CanvasRenderingContext2d,
     ui: user_interface::UserInterface,
     camera: core::Camera,
     tile_grid: tile_grid::TileGrid,
-    entity_map: HashMap<usize, ecs::Entity>,
-    curr_turn: usize,
+    entity_map: HashMap<ecs::EntityId, ecs::Entity>,
+    turn_queue: turn_queue::TurnQueue,
     last_click_pos: (i32, i32),
     last_camera_pos: (f32, f32),
     paused: bool,
@@ -92,19 +100,26 @@ impl GameState {
         let mut id = 0;
 
         let mut entity_map = HashMap::new();
+        let mut turn_queue = turn_queue::TurnQueue::new();
+
         entity_map.insert(id, factory::create_player(px, py));
+        turn_queue.add(id);
         id += 1;
 
         let radius = entity_map.get(&0).unwrap().vision_info.as_ref().unwrap().radius;
         tile_grid.update_visibility(px, py, radius);
 
-        for _ in 0..5 {
+        let num_enemies = 20;
+        let num_orbs = 6;
+
+        for _ in 0..num_enemies {
             let (ex, ey) = tile_grid.get_random_floor();
             entity_map.insert(id, factory::create_enemy(ex, ey, "prison_guard"));
+            turn_queue.add(id);
             id += 1;
         }
 
-        for _ in 0..6 {
+        for _ in 0..num_orbs {
             let (ox, oy) = tile_grid.get_random_floor();
             entity_map.insert(id, factory::create_orb(ox, oy, "health_orb"));
             id +=1;
@@ -121,13 +136,14 @@ impl GameState {
         }
 
         GameState {
+            t0: 0.0,
             ctx: ctx,
             ctx_alpha: ctx_aplha,
             ui: ui,
             camera: camera,
             tile_grid: tile_grid,
             entity_map: entity_map,
-            curr_turn: 0,
+            turn_queue: turn_queue,
             last_click_pos: (0, 0),
             last_camera_pos: (0.0, 0.0),
             paused: false,
@@ -139,11 +155,21 @@ impl GameState {
     // ------- public functions ---------------------
 
     pub fn tick(&mut self, dt_ms: f32) {
+        if TIMING { console_log!("dead: {}", time()-self.t0); }
+
+        if TIMING { self.t0 = time(); }
         if !self.paused {
             self.update(dt_ms/1000.0);
         }
+        if TIMING { console_log!("update: {}", time()-self.t0); }
 
+        if TIMING { self.t0 = time(); }
         self.render();
+        if TIMING { console_log!("render: {}", time()-self.t0); }
+
+        if TIMING { self.t0 = time(); }
+
+        //console_log!("# entities: {}", self.entity_map.len());
     }
 
     pub fn receive_click(&mut self, mx: i32, my: i32, is_down: bool) {
@@ -215,7 +241,7 @@ impl GameState {
     // ------- internal functions ---------------------
 
     fn update(&mut self, dt: f32) {
-        turn_logic::compute_turns(self);
+        turn_logic::process_turns(self);
         combat_logic::process_combat(self);
         movement::move_entities(self, dt);
         movement::move_floating_texts(self, dt);
@@ -231,6 +257,16 @@ impl GameState {
         }
 
         self.enemy_visible_prev = enemy_visible;
+
+        self.process_deaths();
+    }
+
+    fn process_deaths(&mut self) {
+        for (id, entity) in self.entity_map.iter() {
+            if entity.dead {
+                self.turn_queue.remove(*id);
+            }
+        }
 
         self.entity_map.retain(|_, e| !e.dead);
     }
@@ -339,7 +375,7 @@ impl GameState {
         None
     }
 
-    fn get_entity_at(&self, x: i32, y: i32) -> Option<usize> {
+    fn get_entity_at(&self, x: i32, y: i32) -> Option<ecs::EntityId> {
         for (id, entity) in self.entity_map.iter() {
             if *id == 0 { continue; }
 

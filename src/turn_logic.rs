@@ -2,86 +2,78 @@ use crate::GameState;
 use core::Direction;
 use tile_grid::TileGrid;
 use util::get_next_id;
-use ecs::{Entity, LogicalPos, Action, AlertState};
+use ecs::{EntityId, Entity, LogicalPos, Action, AlertState};
 use factory::{get_walk_anim};
 use path_logic;
 use ai_logic;
 
 use debug::log;
 
-pub fn compute_turns(state: &mut GameState) -> Option<()> {
-    let mut compute_next = true;
-    while compute_next {
-        compute_next = false;
+enum GetTurnResult {
+    Blocked,
+    Success,
+    Failure,
+}
 
-        if let None = state.entity_map.get(&state.curr_turn) {
-            increment_turn(state);
-            compute_next = true;
-        }
-
-        if let Some(aq) = &state.entity_map.get(&state.curr_turn)?.action_queue {
-            if let Some(_) = aq.current {
-                // last turn still active, wait for it to be removed
-                return Some(());
+pub fn process_turns(state: &mut GameState) {
+    let (pl_x, pl_y) = {
+        if let Some(player) = state.entity_map.get(&0) {
+            if let Some(lp) = player.logical_pos.as_ref() {
+                (lp.x, lp.y)
             } else {
-                // compute NEW turn
-                let (pl_x, pl_y) = {
-                    let lp = state.entity_map.get(&0)?.logical_pos.as_ref()?;
-                    (lp.x, lp.y)
-                };
-                // update alertness
-                if state.curr_turn > 0 {
-                    update_alertness(
-                        state.entity_map.get_mut(&state.curr_turn)?,
-                        &state.tile_grid,
-                        pl_x, pl_y);
-                }
-                match compute_turn(state) {
-                    Some(action) => {
-                        perform_action_logic(
-                            state.entity_map.get_mut(&state.curr_turn)?,
-                            action,
-                            &mut state.tile_grid,
-                            state.curr_turn == 0,
-                            pl_x, pl_y);
-
-                        // update alertness again
-                        if state.curr_turn > 0 {
-                            update_alertness(
-                                state.entity_map.get_mut(&state.curr_turn)?,
-                                &state.tile_grid,
-                                pl_x, pl_y);
-                        }
-
-                        increment_turn(state);
-                        compute_next = true;
-                    },
-                    None => {},
-                };
+                return;
             }
         } else {
-            // entity does not have ActionQueue comp which means we skip it
-            // (it doesn't participate in this system)
-            increment_turn(state);
-            compute_next = true;
+            return;
         }
-    }
+    };
 
-    Some(())
-}
-
-fn increment_turn(state: &mut GameState) {
-    state.curr_turn += 1;
-    if let None = state.entity_map.get(&state.curr_turn) {
-        if state.curr_turn >= get_next_id(&state.entity_map) {
-            state.curr_turn = 0;
-        }
+    loop {
+        match process_turn(state, pl_x, pl_y) {
+            Some(GetTurnResult::Blocked) => return, // break, waiting for animation or input
+            Some(GetTurnResult::Success) => state.turn_queue.inc(),
+            Some(GetTurnResult::Failure) => console_log!("turn_logic::process_turns failure!!!"),
+            None                         => console_log!("turn_logic::process_turns failure!!!"),
+        };
     }
 }
 
-fn compute_turn(state: &mut GameState) -> Option<Action> {
+fn process_turn(state: &mut GameState, pl_x: i32, pl_y: i32) -> Option<GetTurnResult> {
+    let id = state.turn_queue.get();
+
+    if let Some(aq) = state.entity_map.get(&id)?.action_queue.as_ref() {
+        if let Some(_) = aq.current {
+            // last turn still active, wait for it to be removed
+            Some(GetTurnResult::Blocked)
+        } else {
+            // compute NEW turn
+            if id > 0 {
+                update_alertness(state.entity_map.get_mut(&id)?, &state.tile_grid, pl_x, pl_y);
+            }
+
+            match get_turn_action(state, id, pl_x, pl_y) {
+                Some(action) => {
+                    let entity = state.entity_map.get_mut(&id)?;
+                    perform_action_logic(entity, action, &mut state.tile_grid, id == 0, pl_x, pl_y);
+                    // update alertness again
+                    if id > 0 {
+                        update_alertness(entity, &state.tile_grid, pl_x, pl_y);
+                    }
+
+                    Some(GetTurnResult::Success)
+                },
+                None => Some(GetTurnResult::Blocked),
+            }
+        }
+    } else {
+        // entity does not have ActionQueue comp, should not be in turn queue!
+        console_log!("ERROR: turn queue entity doesn't have actionqueue!!!!");
+        Some(GetTurnResult::Failure)
+    }
+}
+
+fn get_turn_action(state: &mut GameState, id: EntityId, pl_x: i32, pl_y: i32) -> Option<Action> {
     // ActionQueue component is REQUIRED
-    let id = state.curr_turn;
     let aq = state.entity_map.get(&id)?.action_queue.as_ref()?;
 
     /* logic is:
@@ -102,10 +94,7 @@ fn compute_turn(state: &mut GameState) -> Option<Action> {
             x
         }
     } else if id > 0 {
-        ai_logic::compute_action(
-            state.entity_map.get(&id)?,
-            &state.tile_grid,
-            state.entity_map.get(&0)?)
+        ai_logic::compute_action(state.entity_map.get(&id)?, &state.tile_grid, pl_x, pl_y)
     } else {
         None
     }

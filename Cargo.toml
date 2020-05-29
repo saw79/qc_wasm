@@ -15,4 +15,6 @@ rand = { version = "0.7.3", features = ["wasm-bindgen"] }
 version = "0.3.39"
 features = [
   "CanvasRenderingContext2d",
+  "Window",
+  "Performance",
   ]

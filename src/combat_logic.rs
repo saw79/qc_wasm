@@ -1,24 +1,27 @@
 use crate::GameState;
 use core::FloatingText;
-use ecs::Entity;
+use ecs::{EntityId, Entity};
 use util::get_next_id;
 
 use debug::log;
 
 pub fn process_combat(state: &mut GameState) {
-    let max_id = get_next_id(&state.entity_map);
-    for id in 0..max_id {
+    let keys: Vec<EntityId> = state.entity_map.keys().cloned().collect();
+    for id in keys {
         process_attack(state, id);
     }
 }
 
-fn process_attack(state: &mut GameState, id: usize) -> Option<()> {
+fn process_attack(state: &mut GameState, id: EntityId) -> Option<()> {
     let tgt_id = state.entity_map.get(&id)?.combat_info.as_ref()?.current_attack?;
 
     // basic damage hit
     let dmg = state.entity_map.get(&id)?.combat_info.as_ref()?.damage;
     state.entity_map.get_mut(&tgt_id)?.combat_info.as_mut()?.health -= dmg;
     state.entity_map.get_mut(&tgt_id)?.combat_info.as_mut()?.cognition -= dmg;
+    if state.entity_map.get(&tgt_id)?.combat_info.as_ref()?.cognition <= 0 {
+        state.entity_map.get_mut(&tgt_id)?.combat_info.as_mut()?.cognition = 0;
+    }
 
     // cognition
     update_vision(state.entity_map.get_mut(&tgt_id)?);
