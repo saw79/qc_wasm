@@ -107,8 +107,8 @@ impl GameState {
         let radius = entity_map.get(&0).unwrap().vision_info.as_ref().unwrap().radius;
         tile_grid.update_visibility(px, py, radius);
 
-        let num_enemies = 2;//20;
-        let num_orbs = 1;//6;
+        let num_enemies = 20;
+        let num_orbs = 6;
 
         for _ in 0..num_enemies {
             let (ex, ey) = tile_grid.get_random_floor();

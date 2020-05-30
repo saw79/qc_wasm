@@ -1,7 +1,6 @@
 use crate::GameState;
 use core::FloatingText;
 use ecs::{EntityId, Entity};
-use util::get_next_id;
 
 use debug::log;
 
@@ -25,7 +24,7 @@ fn process_attack(state: &mut GameState, id: EntityId) -> Option<()> {
 
     // cognition
     update_vision(state.entity_map.get_mut(&tgt_id)?);
-    if id == 0 {
+    if tgt_id == 0 {
         state.update_visibility();
     }
 
