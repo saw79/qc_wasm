@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use rand::prelude::*;
 
 use core::Camera;
+use ecs::EntityId;
 
 pub fn rand_usize(x0: usize, x1: usize) -> usize {
     random::<usize>() % (x1 - x0) + x0
@@ -22,14 +23,15 @@ pub fn pixel_to_world(p_x: i32, p_y: i32, camera: &Camera) -> (f32, f32) {
     (w_x, w_y)
 }
 
-pub fn get_next_id<T>(hm: &HashMap<usize, T>) -> usize {
-    let mut max_id: usize = 0;
+pub fn get_next_id<T>(hm: &HashMap<EntityId, T>) -> EntityId {
+    /*let mut max_id: EntityId = 0;
     for &id in hm.keys() {
         if id > max_id {
             max_id = id;
         }
     }
 
-    max_id + 1
+    max_id + 1*/
+    hm.keys().max().map(|i| i+1).unwrap_or(0)
 }
 

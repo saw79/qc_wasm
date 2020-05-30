@@ -21,19 +21,26 @@ impl Pos {
 
                 let nx = x + dx;
                 let ny = y + dy;
+                let mut valid = false;
                 if nx >= 0 && nx < tile_grid.width as i32 && ny >= 0 && ny < tile_grid.height as i32 {
                     match tile_grid.at(nx, ny) {
                         &TileType::EMPTY      => {},
-                        &TileType::FLOOR      => nbs.push(Pos(nx, ny)),
+                        &TileType::FLOOR      => valid = true,
                         &TileType::WALL       => {},
-                        &TileType::DOORCLOSED => nbs.push(Pos(nx, ny)),
-                        &TileType::DOOROPEN   => nbs.push(Pos(nx, ny)),
+                        &TileType::DOORCLOSED => valid = true,
+                        &TileType::DOOROPEN   => valid = true,
                     };
+                }
+
+                if valid {
+                    let pp = Pos(nx, ny);
+                    let dist = self.distance(&pp);
+                    nbs.push((pp, dist));
                 }
             }
         }
 
-        nbs.into_iter().map(|p| (p, 1)).collect()
+        nbs
     }
 }
 

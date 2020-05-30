@@ -97,42 +97,40 @@ impl GameState {
 
         // ----- add entities ------
 
-        let mut id = 0;
-
         let mut entity_map = HashMap::new();
         let mut turn_queue = turn_queue::TurnQueue::new();
 
+        let id = util::get_next_id(&entity_map);
         entity_map.insert(id, factory::create_player(px, py));
         turn_queue.add(id);
-        id += 1;
 
         let radius = entity_map.get(&0).unwrap().vision_info.as_ref().unwrap().radius;
         tile_grid.update_visibility(px, py, radius);
 
-        let num_enemies = 20;
-        let num_orbs = 6;
+        let num_enemies = 2;//20;
+        let num_orbs = 1;//6;
 
         for _ in 0..num_enemies {
             let (ex, ey) = tile_grid.get_random_floor();
+            let id = util::get_next_id(&entity_map);
             entity_map.insert(id, factory::create_enemy(ex, ey, "prison_guard"));
             turn_queue.add(id);
-            id += 1;
         }
 
         for _ in 0..num_orbs {
             let (ox, oy) = tile_grid.get_random_floor();
+            let id = util::get_next_id(&entity_map);
             entity_map.insert(id, factory::create_orb(ox, oy, "health_orb"));
-            id +=1;
 
             let (ox, oy) = tile_grid.get_random_floor();
+            let id = util::get_next_id(&entity_map);
             entity_map.insert(id, factory::create_orb(ox, oy, "cognition_orb"));
-            id +=1;
         }
 
         for _ in 0..2 {
             let (ox, oy) = tile_grid.get_random_floor();
+            let id = util::get_next_id(&entity_map);
             entity_map.insert(id, factory::create_orb(ox, oy, "rejuvination_orb"));
-            id +=1;
         }
 
         GameState {
