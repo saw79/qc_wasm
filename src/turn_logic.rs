@@ -14,20 +14,22 @@ enum GetTurnResult {
     Failure,
 }
 
-pub fn process_turns(state: &mut GameState) {
-    let (pl_x, pl_y) = {
-        if let Some(player) = state.entity_map.get(&0) {
-            if let Some(lp) = player.logical_pos.as_ref() {
-                (lp.x, lp.y)
-            } else {
-                return;
-            }
-        } else {
-            return;
-        }
-    };
+fn get_player_pos(state: &GameState) -> Option<(i32, i32)> {
+    let player = state.entity_map.get(&0)?;
+    let lp = player.logical_pos.as_ref()?;
+    Some((lp.x, lp.y))
+}
 
+pub fn process_turns(state: &mut GameState) {
     loop {
+        let (pl_x, pl_y) = match get_player_pos(state) {
+            Some((x, y)) => (x, y),
+            None => {
+                console_log!("[ERROR] (turn_logic/process_turns) - can't get player stuff!");
+                return;
+            },
+        };
+
         match process_turn(state, pl_x, pl_y) {
             Some(GetTurnResult::Blocked) => return, // break, waiting for animation or input
             Some(GetTurnResult::Success) => state.turn_queue.inc(),

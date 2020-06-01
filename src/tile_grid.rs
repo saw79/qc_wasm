@@ -4,7 +4,7 @@ use core::Direction;
 use util::rand_usize;
 use bresenham::get_line;
 use level_gen::{
-    //gen_level_test,
+    gen_level_test,
     gen_level_bsp,
 };
 

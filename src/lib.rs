@@ -74,15 +74,17 @@ impl GameState {
     #[wasm_bindgen(constructor)]
     pub fn new(ctx: CanvasRenderingContext2d, ctx_aplha: CanvasRenderingContext2d,
                width: i32, height: i32) -> Self {
+        let (grid_w, grid_h) = (40, 40);
+
         // initialize camera/grid/level
-        let mut camera = core::Camera::new(40, 40, width, height);
+        let mut camera = core::Camera::new(grid_w, grid_h, width, height);
 
         // initialize user interface
         let ui = user_interface::UserInterface::new(camera.canvas_width,
                                                     camera.canvas_height,
                                                     camera.tile_pix);
 
-        let mut tile_grid = tile_grid::TileGrid::new(40, 40);
+        let mut tile_grid = tile_grid::TileGrid::new(grid_w as usize, grid_h as usize);
 
         let (px, py) = tile_grid.get_random_floor();
 
@@ -311,7 +313,7 @@ impl GameState {
         }
         else {
             let mut clicked_enemy = false;
-            if let Some(id) = self.get_entity_at(wx_int, wy_int) {
+            if let Some(id) = self.get_combat_entity_at(wx_int, wy_int) {
                 if let Some(_) = self.entity_map.get(&id)?.combat_info.as_ref() {
                     self.entity_map.get_mut(&0)?.entity_target = Some(ecs::EntityTarget { id: id });
                     clicked_enemy = true;
@@ -350,7 +352,7 @@ impl GameState {
     }
 
     fn try_attack_tile(&mut self, x: i32, y: i32) -> Option<bool> {
-        match self.get_entity_at(x, y) {
+        match self.get_combat_entity_at(x, y) {
             Some(id) => {
                 self.entity_map.get_mut(&0)?.entity_target = Some(ecs::EntityTarget { id: id });
                 Some(true)
@@ -373,13 +375,29 @@ impl GameState {
         None
     }
 
-    fn get_entity_at(&self, x: i32, y: i32) -> Option<ecs::EntityId> {
+    fn get_any_entity_at(&self, x: i32, y: i32) -> Option<ecs::EntityId> {
         for (id, entity) in self.entity_map.iter() {
             if *id == 0 { continue; }
 
             if let Some(pos) = &entity.logical_pos {
                 if pos.x == x && pos.y == y {
                     return Some(*id);
+                }
+            }
+        }
+
+        None
+    }
+
+    fn get_combat_entity_at(&self, x: i32, y: i32) -> Option<ecs::EntityId> {
+        for (id, entity) in self.entity_map.iter() {
+            if *id == 0 { continue; }
+
+            if let Some(pos) = &entity.logical_pos {
+                if pos.x == x && pos.y == y {
+                    if let Some(_) = entity.combat_info.as_ref() {
+                        return Some(*id);
+                    }
                 }
             }
         }

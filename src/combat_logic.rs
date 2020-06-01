@@ -35,8 +35,8 @@ fn process_attack(state: &mut GameState, id: EntityId) -> Option<()> {
 
     state.entity_map.get_mut(&id)?.combat_info.as_mut()?.current_attack = None;
 
-    let tgt_ri = state.entity_map.get(&tgt_id)?.render_info.as_ref()?;
-    state.floating_texts.push(FloatingText::new(dmg.to_string(), "floating_red".to_string(), 0.0, tgt_ri.x, tgt_ri.y));
+    let tgt_lp = state.entity_map.get(&tgt_id)?.logical_pos.as_ref()?;
+    state.floating_texts.push(FloatingText::new(dmg.to_string(), "floating_red".to_string(), 0.0, tgt_lp.x as f32, tgt_lp.y as f32));
 
     Some(())
 }

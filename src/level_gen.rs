@@ -5,20 +5,6 @@ use debug::log;
 
 type TileArr = Vec<Vec<TileType>>;
 
-/*
-pub fn gen_level_test(width: usize, height: usize) -> TileArr {
-    let mut tiles = init_exterior(width, height);
-
-    tiles[1][1] = TileType::DOOROPEN;
-    tiles[1][2] = TileType::DOORCLOSED;
-
-    for y in 2..height-2 {
-        tiles[y][20] = TileType::WALL;
-    }
-
-    tiles
-}
-*/
 
 fn init_exterior(width: usize, height: usize, fill: TileType) -> TileArr {
     let mut tiles = vec![vec![fill; width]; height];
@@ -31,6 +17,21 @@ fn init_exterior(width: usize, height: usize, fill: TileType) -> TileArr {
         tiles[y][0] = TileType::WALL;
         tiles[y][width-1] = TileType::WALL;
     }
+
+    tiles
+}
+
+pub fn gen_level_test(width: usize, height: usize) -> TileArr {
+    let mut tiles = init_exterior(width, height, TileType::WALL);
+
+    for x in 1..width-1 {
+        for y in 1..height-1 {
+            tiles[y][x] = TileType::FLOOR;
+        }
+    }
+
+    tiles[1][1] = TileType::DOOROPEN;
+    tiles[1][2] = TileType::DOORCLOSED;
 
     tiles
 }
